@@ -20,9 +20,9 @@ import com.websudos.neo._
 
 class PersonNode extends Node[Person] {
   
-  val name: String with Index
+  object name extends StringNode with Index
   
-  val age: Int
+  object name extends IntNode
   
   def fromNode(node: Node[Person]): Person = {
     Person(name, age)  
