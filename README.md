@@ -16,7 +16,7 @@ case class Person(name: String, age: Int)
 
 Neo4j node definition
 ```
-import com.websudos.neo._
+import com.websudos.reactiveneo._
 
 class PersonNode extends Node[Person] {
   
