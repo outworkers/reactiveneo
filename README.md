@@ -2,8 +2,18 @@
 
 Reactive typesafe Scala DSL for Neo4j
 
-* auto-gen TOC:
-{:toc}
+The library enforces strong type checks that imposes some restrictions on query format. Every node and relationship
+used in the query needs to be defined and named.
+E.g. this kind of query will not be supported:
+```
+MATCH (wallstreet { title:'Wall Street' })<-[r:ACTED_IN]-(actor)
+RETURN r
+```
+Instead you will need to use proper labels for nodes to produce the following query:
+```
+MATCH (wallstreet:Movie { title:'Wall Street' })<-[r:ACTED_IN]-(actor:Actor)
+RETURN r
+```
 
 # Graph modelling
 
@@ -14,33 +24,39 @@ Domain model class
 case class Person(name: String, age: Int)
 ```
 
-Neo4j node definition
+Reactiveneo node definition
 ```
-import com.websudos.neo._
+import com.websudos.reactiveneo.dsl._
 
-class PersonNode extends Node[Person] {
+class PersonNode extends Node[PersonNode, Person] {
   
-  val name: String with Index
+  object name extends Attribute[String] with Index
   
-  val age: Int
+  object age extends Attribute[Int]
   
-  def fromNode(node: Node[Person]): Person = {
-    Person(name, age)  
+  def fromRecord(record: NodeRecord): Person = {
+    Person(record.value[name], record.value[age])  
   }
   
 }
 ```
 
-When no custom mapping required
-```
-class PersonNode extends DefaultNode[Person]
-```
 
 ## Relationships
 
+case class Studied
+
 ```
-class MyRelationship extends Relationship {
+import com.websudos.reactiveneo.dsl._
+
+class StudiedRelationship extends Relationship[StudiedRelationship, Studied] {
   
+  object year extends Attribute[Int]
+
+  def fromRecord(record: NodeRecord): Person = {
+    Studied(record.value[year])  
+  }
+    
 }
 
 ```
@@ -51,14 +67,7 @@ class MyRelationship extends Relationship {
 
 # Querying
 ```
-match(node[Person]).where { p =>
-  p.name === "Samantha"
-}.return(p)
-```
-
-Multi node query
-```
-match(node[Person], node[Person]).where { case (p1, p2) =>
-  p1.age === p2.age
-}.return(p1, p2)
+matches[PersonNode](_.name := "Martin").
+  inRelation(StudiedRelationship.any, PersonNode.criteria(name eq "Robert")).
+  return( case(person1, rel, person2) => person1.name)
 ```

@@ -1,3 +1,17 @@
+/*
+ * Copyright 2014 websudos ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import org.scoverage.coveralls.CoverallsPlugin.coverallsSettings
 
 import sbt.Keys._
@@ -10,6 +24,9 @@ object reactiveneo extends Build {
   val newzlyUtilVersion = "0.1.19"
   val scalatestVersion = "2.2.0-M1"
   val finagleVersion = "6.17.0"
+  val playVersion = "2.3.3"
+  val scalazVersion = "7.0.6"
+  val neo4jVersion = "2.1.4"
 
   val publishUrl = "http://maven.websudos.co.uk"
 
@@ -95,6 +112,14 @@ object reactiveneo extends Build {
       "-feature",
       "-unchecked"
      ),
+    libraryDependencies ++= Seq(
+      "com.chuusai"                  %  "shapeless_2.10.4"                  % "2.0.0",
+      "com.github.nscala-time"       %% "nscala-time"                       % "1.0.0",
+      "com.typesafe.scala-logging"   %% "scala-logging-slf4j"               % "2.1.2",
+      "org.scalaz"                   %% "scalaz-scalacheck-binding"         % scalazVersion % "test",
+      "org.scalatest"                %% "scalatest"                         % scalatestVersion % "test, provided",
+      "com.newzly"                   %% "util-testing"                      % newzlyUtilVersion  % "test"
+    ),
     fork in Test := true,
     javaOptions in Test ++= Seq("-Xmx2G")
   ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ instrumentSettings ++ publishSettings ++ ScalastylePlugin.Settings
@@ -104,7 +129,7 @@ object reactiveneo extends Build {
     base = file("."),
     settings = Defaults.coreDefaultSettings ++ sharedSettings ++ coverallsSettings
   ).settings(
-    name := "reactiveneo"
+    name := "ReactiveNeo"
   ).aggregate(
     reactiveneoDsl,
     reactiveneoTesting,
@@ -120,11 +145,15 @@ object reactiveneo extends Build {
   ).settings(
     name := "reactiveneo-dsl",
     libraryDependencies ++= Seq(
-      "com.chuusai"                  % "shapeless_2.10.4"                   % "2.0.0",
+      "com.chuusai"                  %  "shapeless_2.10.4"                  % "2.0.0",
       "org.scala-lang"               %  "scala-reflect"                     % "2.10.4",
+      "com.twitter"                  %% "finagle-http"                      % finagleVersion,
       "com.twitter"                  %% "util-core"                         % finagleVersion,
       "joda-time"                    %  "joda-time"                         % "2.3",
       "org.joda"                     %  "joda-convert"                      % "1.6",
+      "org.neo4j"                    %  "neo4j"                             % neo4jVersion,
+      "com.typesafe.play"            %% "play-json"                         % playVersion,
+      "org.neo4j"                    %  "neo4j"                             % neo4jVersion,
       "net.liftweb"                  %% "lift-json"                         % "2.6-M4"                  % "test, provided"
     )
   ).dependsOn(
