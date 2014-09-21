@@ -31,7 +31,7 @@ case class BuiltQuery(queryString: String) {
   def append[T](value: T)(implicit formatter: ValueFormatter[T]): BuiltQuery = append(formatter.format(value))
 
   def appendSpaced(str: String): BuiltQuery = appendSpaced(new BuiltQuery(str))
-  def appendSpaced(query: BuiltQuery): BuiltQuery = append(" ").append(query).append(" ")
+  def appendSpaced(query: BuiltQuery): BuiltQuery = (if(spaced) this else append(" ")).append(query).append(" ")
   def appendSpaced[T](value: T)(implicit formatter: ValueFormatter[T]): BuiltQuery =
     appendSpaced(new BuiltQuery(formatter.format(value)))
 

@@ -45,10 +45,12 @@ abstract class ReturnExpression[R] {
  * @tparam GO Class of the graph object definition
  * @tparam R Returned type - graph object record type in this case
  */
-case class ObjectReturnExpression[GO <: GraphObject[GO, R], R](go: GO) extends ReturnExpression[R] {
+case class ObjectReturnExpression[GO <: GraphObject[GO, R], R](go: GraphObject[GO, R]) extends ReturnExpression[R] {
 
 
-  override def query(aliases: Map[GraphObject[_, _], String]): BuiltQuery = aliases(go)
+  override def query(aliases: Map[GraphObject[_, _], String]): BuiltQuery = {
+    aliases(go)
+  }
 
 
   override def buildParser: ResultParser[R] = ???
@@ -82,7 +84,7 @@ trait ReturnImplicits {
    AttributeReturnExpression(attr)
  }
 
-  implicit def graphObjectToReturnExpression[GO <: GraphObject[GO, R], R <: GraphObject[_, R]](go: GO): ObjectReturnExpression[GO, R] = {
+  implicit def graphObjectToReturnExpression[GO <: GraphObject[GO, R], R](go: GraphObject[GO, R]): ObjectReturnExpression[GO, R] = {
     ObjectReturnExpression(go)
   }
 

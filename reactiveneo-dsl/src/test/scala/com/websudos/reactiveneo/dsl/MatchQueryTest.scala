@@ -20,13 +20,19 @@ import Predicate._
 class MatchQueryTest extends FlatSpec with Matchers {
 
   it should "build a simple query with a predicate" in {
-    matches[TestNode]( node => node.name := "Tom" ).returnAll.query shouldEqual "MATCH (a:TestNode {name:'Tom'})  RETURN  * "
+    matches[TestNode]( node => node.name := "Tom" ).returnAll.query shouldEqual "MATCH (a:TestNode {name:'Tom'}) RETURN * "
 
   }
 
   it should "build a simple query without any predicate" in {
-    matches[TestNode]().returnAll.query shouldEqual "MATCH (a:TestNode)  RETURN  * "
+    matches[TestNode]().returnAll.query shouldEqual "MATCH (a:TestNode) RETURN * "
   }
 
+  it should "build a query returning single object" in {
+    matches[TestNode]().returns(n => n).query shouldEqual "MATCH (a:TestNode) RETURN a "
+  }
 
+  it should "build a query returning object attribute" in {
+    matches[TestNode]().returns(_.name).query shouldEqual "MATCH (a:TestNode) RETURN a.name "
+  }
 }

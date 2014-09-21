@@ -99,7 +99,7 @@ private[reactiveneo] class MatchQuery[
   final def returns(ret: GO => ReturnExpression[_]): MatchQuery[GO, WB, ReturnBound, OB, LB]  = {
     new MatchQuery[GO, WB, ReturnBound, OB, LB](
       node,
-      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(aliases.values.mkString(",")),
+      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(ret(node).query(aliases)),
       aliases)
   }
 

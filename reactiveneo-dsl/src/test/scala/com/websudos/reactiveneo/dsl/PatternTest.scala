@@ -20,13 +20,13 @@ import org.scalatest.{FlatSpec, Matchers}
 class PatternTest extends FlatSpec with Matchers {
 
   it should "serialize simple pattern to a string" in {
-    Pattern(new TestNode, "a").clause.queryString shouldEqual "(a:TestNodeObject)"
+    Pattern(new TestNode, "a").clause.queryString shouldEqual "(a:TestNode)"
   }
 
 
   it should "serialize pattern with criteria to a string" in {
     val owner = new TestNode
-    Pattern(owner, "a", Predicate(owner.name, "Tom")).clause.queryString shouldEqual """(a:TestNodeObject {name:'Tom'})"""
+    Pattern(owner, "a", Predicate(owner.name, "Tom")).clause.queryString shouldEqual """(a:TestNode {name:'Tom'})"""
   }
 }
 
