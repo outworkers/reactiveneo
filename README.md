@@ -26,37 +26,31 @@ case class Person(name: String, age: Int)
 
 Reactiveneo node definition
 ```
-import com.websudos.reactiveneo.dsl._
+import com.websudos.neo._
 
 class PersonNode extends Node[PersonNode, Person] {
   
-  object name extends Attribute[String] with Index
+  object name extends StringNode with Index
   
-  object age extends Attribute[Int]
+  object name extends IntNode
   
-  def fromRecord(record: NodeRecord): Person = {
-    Person(record.value[name], record.value[age])  
+  def fromNode(node: Node[Person]): Person = {
+    Person(name, age)  
   }
   
 }
 ```
 
+When no custom mapping required
+```
+class PersonNode extends DefaultNode[Person]
+```
 
 ## Relationships
 
-case class Studied
-
 ```
-import com.websudos.reactiveneo.dsl._
-
-class StudiedRelationship extends Relationship[StudiedRelationship, Studied] {
+class MyRelationship extends Relationship {
   
-  object year extends Attribute[Int]
-
-  def fromRecord(record: NodeRecord): Person = {
-    Studied(record.value[year])  
-  }
-    
 }
 
 ```
@@ -67,7 +61,14 @@ class StudiedRelationship extends Relationship[StudiedRelationship, Studied] {
 
 # Querying
 ```
-matches[PersonNode](_.name := "Martin").
-  inRelation(StudiedRelationship.any, PersonNode.criteria(name eq "Robert")).
-  return( case(person1, rel, person2) => person1.name)
+match(node[Person]).where { p =>
+  p.name === "Samantha"
+}.return(p)
+```
+
+Multi node query
+```
+match(node[Person], node[Person]).where { case (p1, p2) =>
+  p1.age === p2.age
+}.return(p1, p2)
 ```

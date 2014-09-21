@@ -26,7 +26,6 @@ object reactiveneo extends Build {
   val finagleVersion = "6.17.0"
   val playVersion = "2.3.3"
   val scalazVersion = "7.0.6"
-  val neo4jVersion = "2.1.4"
 
   val publishUrl = "http://maven.websudos.co.uk"
 
@@ -145,15 +144,13 @@ object reactiveneo extends Build {
   ).settings(
     name := "reactiveneo-dsl",
     libraryDependencies ++= Seq(
-      "com.chuusai"                  %  "shapeless_2.10.4"                  % "2.0.0",
+      "com.chuusai"                  % "shapeless_2.10.4"                   % "2.0.0",
       "org.scala-lang"               %  "scala-reflect"                     % "2.10.4",
       "com.twitter"                  %% "finagle-http"                      % finagleVersion,
       "com.twitter"                  %% "util-core"                         % finagleVersion,
       "joda-time"                    %  "joda-time"                         % "2.3",
       "org.joda"                     %  "joda-convert"                      % "1.6",
-      "org.neo4j"                    %  "neo4j"                             % neo4jVersion,
       "com.typesafe.play"            %% "play-json"                         % playVersion,
-      "org.neo4j"                    %  "neo4j"                             % neo4jVersion,
       "net.liftweb"                  %% "lift-json"                         % "2.6-M4"                  % "test, provided"
     )
   ).dependsOn(
