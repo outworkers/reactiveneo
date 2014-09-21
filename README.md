@@ -2,8 +2,18 @@
 
 Reactive typesafe Scala DSL for Neo4j
 
-* auto-gen TOC:
-{:toc}
+The library enforces strong type checks that imposes some restrictions on query format. Every node and relationship
+used in the query needs to be defined and named.
+E.g. this kind of query will not be supported:
+```
+MATCH (wallstreet { title:'Wall Street' })<-[r:ACTED_IN]-(actor)
+RETURN r
+```
+Instead you will need to use proper labels for nodes to produce the following query:
+```
+MATCH (wallstreet:Movie { title:'Wall Street' })<-[r:ACTED_IN]-(actor:Actor)
+RETURN r
+```
 
 # Graph modelling
 
@@ -14,11 +24,11 @@ Domain model class
 case class Person(name: String, age: Int)
 ```
 
-Neo4j node definition
+Reactiveneo node definition
 ```
-import com.websudos.reactiveneo._
+import com.websudos.neo._
 
-class PersonNode extends Node[Person] {
+class PersonNode extends Node[PersonNode, Person] {
   
   object name extends StringNode with Index
   

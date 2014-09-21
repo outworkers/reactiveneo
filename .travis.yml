@@ -1,0 +1,29 @@
+# Travis CI credentials
+
+language: scala
+
+scala:
+ - "2.10.4"
+
+# Emails to notify
+notifications:
+  slack:
+    rooms:
+      - newzly:nfmIGqhmrfJb6pIH6I50mnCO
+      - websudos:P9QNXx1ZGFnDHp3v3jUqtB8k
+
+  email:
+  - dev@newzly.com
+
+# Branches to build.
+branches:
+  only:
+    - master
+    - develop
+
+jdk:
+  - oraclejdk7
+  - openjdk7
+
+script: "sbt test"
+
