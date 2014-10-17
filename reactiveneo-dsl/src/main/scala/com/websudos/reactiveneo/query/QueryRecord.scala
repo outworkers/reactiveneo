@@ -12,16 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.websudos.reactiveneo.attribute
+package com.websudos.reactiveneo.query
 
-import com.websudos.reactiveneo.dsl.GraphObject
+import play.api.libs.json.{Reads, JsObject}
 
 /**
- * String attribute definition.
+ * Wraps a single record result of Cypher query.
  */
-class StringAttribute[Owner <: GraphObject[Owner, R], R](graphObject: GraphObject[Owner, R])
-  extends Attribute[Owner, R, String](graphObject)
+class QueryRecord(obj: JsObject) {
+
+  def attributes: IndexedSeq[String] = obj.fields.map(_._1).toIndexedSeq
+
+  def apply[T](attributeName: String)(implicit parser: Reads[T]): Option[T] = {
+    (obj \ attributeName).asOpt[T]
+  }
+
+}
 
 
-class IntegerAttribute[Owner <: GraphObject[Owner, R], R](graphObject: GraphObject[Owner, R])
-  extends Attribute[Owner, R, Int](graphObject)
+object QueryRecord {
+  def apply(obj: JsObject) = new QueryRecord(obj)
+}

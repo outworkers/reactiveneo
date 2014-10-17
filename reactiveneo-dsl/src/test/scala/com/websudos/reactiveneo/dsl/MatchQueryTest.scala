@@ -17,15 +17,14 @@ package com.websudos.reactiveneo.dsl
 import org.scalatest.{Matchers, FlatSpec}
 import Predicate._
 
-class MatchQueryTest extends FlatSpec with Matchers {
+class MatchQueryTest extends FlatSpec with Matchers with ReturnImplicits {
 
   it should "build a simple query with a predicate" in {
-    matches[TestNode]( node => node.name := "Tom" ).returnAll.query shouldEqual "MATCH (a:TestNode {name:'Tom'}) RETURN * "
-
+    matches[TestNode]( node => node.name := "Tom" ).returns(go => go).query shouldEqual "MATCH (a:TestNode {name:'Tom'}) RETURN a "
   }
 
   it should "build a simple query without any predicate" in {
-    matches[TestNode]().returnAll.query shouldEqual "MATCH (a:TestNode) RETURN * "
+    matches[TestNode]().returns(n => n).query shouldEqual "MATCH (a:TestNode) RETURN a "
   }
 
   it should "build a query returning single object" in {

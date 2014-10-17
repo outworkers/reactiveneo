@@ -21,6 +21,7 @@ import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
 import scala.collection.immutable.Seq
+import scala.util.Try
 
 /**
  * Parser abstraction to  used to parse JSON format of HttpResult content. To use this base class implementation of
@@ -32,13 +33,12 @@ abstract class JsonParser[R] extends ResultParser[R] {
    * Implementation of of converter from JsValue to target type.
    * @return Returns converted value.
    */
-  def reads: Reads[R]
+  def parseResult(js: JsValue): R
 
-  private def parseJson(s: String): R = {
+  private def parseJson(s: String): Try[R] = {
     val json = Json.parse(s)
-    reads.reads(json) match {
-      case JsSuccess(value, _) => value
-      case e: JsError => throw new JsonValidationException(buildErrorMessage(e))
+    Try {
+      parseResult(json)
     }
   }
 
@@ -49,11 +49,11 @@ abstract class JsonParser[R] extends ResultParser[R] {
     s"Errors at $path: $message"
   }
 
-  private[this] def buildErrorMessage(error: JsError) = {
+  private[client] def buildErrorMessage(error: JsError) = {
     error.errors.tail.foldLeft(singleErrorMessage(error.errors.head))((acc,err) => s"acc,${singleErrorMessage(err)}")
   }
 
-  override def parseResult(response: HttpResponse): R = {
+  override def parseResult(response: HttpResponse): Try[R] = {
     if(response.getStatus.getCode == HttpResponseStatus.OK.getCode) {
       parseJson(response.getContent.toString(Charset.forName("UTF-8")))
     } else {

@@ -12,18 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.websudos.reactiveneo.dsl
+package com.websudos.reactiveneo.client
 
 import org.scalatest.{Matchers, FlatSpec}
 
+class ServerMockTest extends FlatSpec with Matchers with ServerMockSugar {
 
-class ObjectReturnExpressionTest extends FlatSpec with Matchers {
-
-  it should "build a query" in {
-    val node = new TestNode
-    ObjectReturnExpression[TestNode, TestNodeRecord](node).query(Map(node -> "abc")).queryString shouldEqual "abc"
+  it should "return a listening port" in {
+    val server = new ServerMock( _ => "hello")
+    server.port should be > 0
   }
 
-  
 
+  it should "return a host name" in {
+    val server = new ServerMock( _ => "hello")
+    server.host shouldEqual "localhost"
+  }
 }

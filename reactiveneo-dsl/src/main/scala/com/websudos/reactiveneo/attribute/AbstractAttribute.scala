@@ -15,6 +15,7 @@
 package com.websudos.reactiveneo.attribute
 
 import com.websudos.reactiveneo.dsl.GraphObject
+import com.websudos.reactiveneo.query.QueryRecord
 
 import scala.reflect.runtime.{currentMirror => cm}
 
@@ -25,6 +26,40 @@ abstract class AbstractAttribute[@specialized(Int, Double, Float, Long, Boolean,
 
   lazy val name: String = cm.reflect(this).symbol.name.toTypeName.decoded
 
+  /**
+   * Decode attribute value from the query result.
+   * @param query Query result data.
+   * @return Decoded attribute value.
+   */
+  def apply(query: QueryRecord): T
+
 }
 
-abstract class Attribute[Owner <: GraphObject[Owner, R], R, T](val owner: GraphObject[Owner, R]) extends AbstractAttribute[T]
+abstract class Attribute[Owner <: GraphObject[Owner, R], R, T](val owner: GraphObject[Owner, R])
+  extends AbstractAttribute[T] {
+
+}
+
+
+/**
+ * String attribute definition.
+ */
+class StringAttribute[Owner <: GraphObject[Owner, R], R](graphObject: GraphObject[Owner, R])
+  extends Attribute[Owner, R, String](graphObject) {
+
+  override def apply(query: QueryRecord): String = {
+    query[String](name).get
+  }
+
+
+}
+
+
+class IntegerAttribute[Owner <: GraphObject[Owner, R], R](graphObject: GraphObject[Owner, R])
+  extends Attribute[Owner, R, Int](graphObject) {
+
+  override def apply(query: QueryRecord): Int = {
+    query[Int](name).get
+  }
+
+}

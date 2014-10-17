@@ -15,6 +15,7 @@
 package com.websudos.reactiveneo.dsl
 
 import com.websudos.reactiveneo.attribute.StringAttribute
+import com.websudos.reactiveneo.query.QueryRecord
 
 case class TestNodeRecord(name: String)
 
@@ -23,5 +24,7 @@ class TestNode extends Node[TestNode, TestNodeRecord] {
 
   object name extends StringAttribute(this)
 
-  override def fromQuery(data: Map[String, _]): TestNodeRecord = TestNodeRecord(data("name").asInstanceOf[String])
+  override def fromQuery(data: QueryRecord): TestNodeRecord = {
+    TestNodeRecord(name(data))
+  }
 }

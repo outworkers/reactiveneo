@@ -4,7 +4,7 @@ Reactive typesafe Scala DSL for Neo4j
 
 The library enforces strong type checks that imposes some restrictions on query format. Every node and relationship
 used in the query needs to be defined and named.
-E.g. this kind of query will not be supported:
+E.g. this kind of query is not supported:
 ```
 MATCH (wallstreet { title:'Wall Street' })<-[r:ACTED_IN]-(actor)
 RETURN r
@@ -26,49 +26,38 @@ case class Person(name: String, age: Int)
 
 Reactiveneo node definition
 ```
-import com.websudos.neo._
+import com.websudos.reactiveneo.dsl._
 
 class PersonNode extends Node[PersonNode, Person] {
   
-  object name extends StringNode with Index
+  object name extends StringAttribute with Index
   
-  object name extends IntNode
+  object age extends IntegerAttribute
   
-  def fromNode(node: Node[Person]): Person = {
-    Person(name, age)  
+  def fromNode(data: QueryRecord): Person = {
+    Person(name[String](data), age[Int](data))  
   }
   
 }
 ```
 
-When no custom mapping required
-```
-class PersonNode extends DefaultNode[Person]
-```
-
 ## Relationships
 
-```
-class MyRelationship extends Relationship {
-  
-}
-
-```
 
 ## Indexes
 
 
 
 # Querying
+
+In this example all nodes of Person type are returned.
 ```
-match(node[Person]).where { p =>
-  p.name === "Samantha"
-}.return(p)
+scala> val personNodes = matches[Person].return(p => p).execute
+personNodes: Future[Seq[Person]]
 ```
 
-Multi node query
+You can also query for specific attributes of a node.
 ```
-match(node[Person], node[Person]).where { case (p1, p2) =>
-  p1.age === p2.age
-}.return(p1, p2)
+scala> val personNames = matches[Person].return(p => p.name).execute
+personNames: Future[Seq[String]]
 ```

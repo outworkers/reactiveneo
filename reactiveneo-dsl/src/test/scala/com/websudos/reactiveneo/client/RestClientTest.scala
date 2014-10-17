@@ -34,6 +34,8 @@ import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.SpanSugar._
 
 import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
 
@@ -57,10 +59,9 @@ class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   it should "execute a request" in {
-      val client = new RestClient(ClientConfiguration("localhost", 6666,
-        FiniteDuration(10, TimeUnit.SECONDS)))
+      val client = new RestClient(ClientConfiguration("localhost", 6666, FiniteDuration(10, TimeUnit.SECONDS)))
       val result = client.makeRequest("/")
-      result successful { res =>
+      result.successful { res =>
         res.getStatus.getCode should equal(200)
         res.getContent.toString(Charset.forName("UTF-8")) should equal("neo")
       }
@@ -68,14 +69,13 @@ class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
 
 
   it should "execute a request with a custom parser" in {
-      val client = new RestClient(ClientConfiguration("localhost", 6666,
-        FiniteDuration(10, TimeUnit.SECONDS)))
+      val client = new RestClient(ClientConfiguration("localhost", 6666, FiniteDuration(10, TimeUnit.SECONDS)))
       implicit val parser = new ResultParser[String] {
-        override def parseResult(response: HttpResponse): String = {
-          response.getContent.toString(Charset.forName("UTF-8"))
+        override def parseResult(response: HttpResponse): Try[String] = {
+          Try(response.getContent.toString(Charset.forName("UTF-8")))
         }
       }
-      val result: Future[String] = client.makeRequest("/")
+      val result: scala.concurrent.Future[String] = client.makeRequest("/")
       result successful { res =>
         res should equal("neo")
       }
