@@ -15,6 +15,7 @@
 package com.websudos.reactiveneo.dsl
 
 import com.websudos.reactiveneo.attribute.AbstractAttribute
+import com.websudos.reactiveneo.query.QueryRecord
 
 import scala.collection.mutable.{ArrayBuffer => MutableArrayBuffer, SynchronizedBuffer => MutableSyncBuffer}
 import scala.reflect.runtime.universe.Symbol
@@ -49,11 +50,17 @@ private[reactiveneo] abstract class GraphObject[Owner <: GraphObject[Owner, Reco
    * @param data The data incoming as a result from a query.
    * @return A Record instance.
    */
-  def fromQuery(data: Map[String, _]): Record
+  def fromQuery(data: QueryRecord): Record
 
+  /**
+   * Symbolic name of this object - an alias.
+   */
   def objectName: String = _name
 
-  def columns: List[AbstractAttribute[_]] = _attributes.toList
+  /**
+   * List of [[com.websudos.reactiveneo.attribute.AbstractAttribute]]s  defined for this graph object.
+   */
+  def attributes: List[AbstractAttribute[_]] = _attributes.toList
 
 
 

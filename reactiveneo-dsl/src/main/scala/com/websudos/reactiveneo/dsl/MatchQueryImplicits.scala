@@ -28,7 +28,7 @@ trait MatchQueryImplicits {
    * @return Returns query object
    */
   def matches[N <: Node[N, _]](predBuilder: (N => Predicate[_])*)
-                              (implicit m: Manifest[N]): MatchQuery[N, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound] = {
+                              (implicit m: Manifest[N]): MatchQuery[N, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, _] = {
     val obj = m.runtimeClass.newInstance().asInstanceOf[N]
 
     val pattern = Pattern(obj, nodeAliases.head, predBuilder.map(pred => pred(obj)): _*)

@@ -15,8 +15,8 @@
 package com.websudos.reactiveneo.dsl
 
 import com.websudos.reactiveneo.attribute.Attribute
-import com.websudos.reactiveneo.client.ResultParser
-import com.websudos.reactiveneo.query.{BuiltQuery, CypherOperators}
+import com.websudos.reactiveneo.query.{QueryRecord, BuiltQuery, CypherOperators}
+import play.api.libs.json.{Reads, _}
 
 /**
  * Return expression defines the element of nodes that need to be returned. It can be the whole node
@@ -32,10 +32,11 @@ abstract class ReturnExpression[R] {
   def query(aliases: Map[GraphObject[_, _], String]): BuiltQuery
 
   /**
-   * Builds result parser for this expression.
+   * Builds result parser for this expression. This is not a full parser but [[Reads]] for extracting values from
+   * a single row of data.
    * @return Returns the result parser.
    */
-  def buildParser: ResultParser[R]
+  def resultParser: Reads[R]
 
 }
 
@@ -53,7 +54,11 @@ case class ObjectReturnExpression[GO <: GraphObject[GO, R], R](go: GraphObject[G
   }
 
 
-  override def buildParser: ResultParser[R] = ???
+  override def resultParser: Reads[R] = {
+    __.read[JsObject].map { obj =>
+      go.fromQuery(QueryRecord(obj))
+    }
+  }
 }
 
 
@@ -63,7 +68,7 @@ case class ObjectReturnExpression[GO <: GraphObject[GO, R], R](go: GraphObject[G
  * @tparam R Returned type - an attribute concrete type in this case.
  */
 case class AttributeReturnExpression[GO <: GraphObject[GO, R], R, T](
-    attribute: Attribute[GO, R, T]) extends ReturnExpression[T] {
+    attribute: Attribute[GO, R, T])(implicit reads: Reads[T]) extends ReturnExpression[T] {
 
 
   override def query(aliases: Map[GraphObject[_, _], String]): BuiltQuery = {
@@ -71,7 +76,10 @@ case class AttributeReturnExpression[GO <: GraphObject[GO, R], R, T](
   }
 
 
-  override def buildParser: ResultParser[T] = ???
+  override def resultParser: Reads[T] = {
+    (__ \ attribute.name).read[T]
+  }
+
 }
 
 /**
@@ -80,7 +88,8 @@ case class AttributeReturnExpression[GO <: GraphObject[GO, R], R, T](
  */
 trait ReturnImplicits {
 
- implicit def attributeToReturnExpression[GO <: GraphObject[GO, R], R, T](attr: Attribute[GO, R, T]): AttributeReturnExpression[GO, R, T] = {
+ implicit def attributeToReturnExpression[GO <: GraphObject[GO, R], R, T](attr: Attribute[GO, R, T])
+                                                                         (implicit reads: Reads[T]): AttributeReturnExpression[GO, R, T] = {
    AttributeReturnExpression(attr)
  }
 

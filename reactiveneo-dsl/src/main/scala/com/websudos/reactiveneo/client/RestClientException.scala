@@ -12,18 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.websudos.reactiveneo.dsl
+package com.websudos.reactiveneo.client
 
-import org.scalatest.{Matchers, FlatSpec}
-
-
-class ObjectReturnExpressionTest extends FlatSpec with Matchers {
-
-  it should "build a query" in {
-    val node = new TestNode
-    ObjectReturnExpression[TestNode, TestNodeRecord](node).query(Map(node -> "abc")).queryString shouldEqual "abc"
-  }
-
-  
-
-}
+/**
+ * Exception related to communication error.
+ */
+class RestClientException(val errors: Seq[ErrorMessage]) extends Exception

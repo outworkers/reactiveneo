@@ -24,7 +24,7 @@ object reactiveneo extends Build {
   val newzlyUtilVersion = "0.1.19"
   val scalatestVersion = "2.2.0-M1"
   val finagleVersion = "6.17.0"
-  val playVersion = "2.3.3"
+  val playVersion = "2.3.4"
   val scalazVersion = "7.0.6"
 
   val publishUrl = "http://maven.websudos.co.uk"
@@ -115,9 +115,10 @@ object reactiveneo extends Build {
       "com.chuusai"                  %  "shapeless_2.10.4"                  % "2.0.0",
       "com.github.nscala-time"       %% "nscala-time"                       % "1.0.0",
       "com.typesafe.scala-logging"   %% "scala-logging-slf4j"               % "2.1.2",
-      "org.scalaz"                   %% "scalaz-scalacheck-binding"         % scalazVersion % "test",
-      "org.scalatest"                %% "scalatest"                         % scalatestVersion % "test, provided",
-      "com.newzly"                   %% "util-testing"                      % newzlyUtilVersion  % "test"
+      "com.newzly"                   %% "util-testing"                      % newzlyUtilVersion   % "test",
+      "org.scalaz"                   %% "scalaz-scalacheck-binding"         % scalazVersion       % "test",
+      "org.scalatest"                %% "scalatest"                         % scalatestVersion    % "test, provided",
+      "org.scalamock"                %% "scalamock-scalatest-support"       % "3.0.1"             % "test"
     ),
     fork in Test := true,
     javaOptions in Test ++= Seq("-Xmx2G")
@@ -180,7 +181,9 @@ object reactiveneo extends Build {
       "com.newzly"                       %% "util-testing"             % newzlyUtilVersion,
       "org.scalatest"                    %% "scalatest"                % scalatestVersion,
       "org.scalacheck"                   %% "scalacheck"               % "1.11.3",
-      "org.fluttercode.datafactory"      %  "datafactory"              % "0.8"
+      "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
+      "com.twitter"                      %% "finagle-http"             % finagleVersion,
+      "com.twitter"                      %% "util-core"                % finagleVersion
     )
   ).dependsOn(
     reactiveneoZookeeper

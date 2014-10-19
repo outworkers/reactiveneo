@@ -14,13 +14,19 @@
  */
 package com.websudos.reactiveneo.client
 
+import java.nio.charset.Charset
+import java.util.concurrent.TimeUnit
+
 import com.twitter.finagle.{Http, Service}
-import com.twitter.util.TimeConversions._
-import com.twitter.util.{Future, JavaTimer, Timer}
+import com.twitter.util
+import com.twitter.util.{Duration, Future, JavaTimer, Timer}
 import com.typesafe.scalalogging.slf4j.StrictLogging
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 
+import scala.concurrent.Promise
 import scala.concurrent.duration.FiniteDuration
+import scala.util.{Failure, Success, Try}
 
 object RestClient {
 
@@ -33,28 +39,37 @@ object RestClient {
 class RestClient(config: ClientConfiguration) extends StrictLogging {
 
 
-  lazy val client: Service[HttpRequest, HttpResponse] =
-    Http.newService(s"${config.server}:${config.port}")
+  lazy val client: Service[HttpRequest, HttpResponse] = Http.newService(s"${config.server}:${config.port}")
 
   implicit lazy val timer: Timer = new JavaTimer()
 
   /**
    * Execute the request with given parser.
    * @param path Path to execute the request against.
-   * @param timeout Timeout to apply
    * @param parser Parser used to parse the result.
    * @tparam R Type of result
    * @return Returns future of parsed result object.
    */
-  def makeRequest[R](path: String, timeout: FiniteDuration = config.defaultTimeout)
-                 (implicit parser: ResultParser[R]): Future[R] = {
-    val request =  new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path)
+  def makeRequest[R](path: String, method: HttpMethod = HttpMethod.GET, content: Option[String] = None)
+                 (implicit parser: ResultParser[R]): concurrent.Future[R] = {
+    val request =  new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, path)
+    content.foreach { body =>
+      request.setContent(ChannelBuffers.copiedBuffer(body, Charset.forName("UTF-8")))
+    }
 
-    val response: Future[HttpResponse] = client(request)
+    val response: util.Future[HttpResponse] = client(request)
     response onSuccess { resp: HttpResponse =>
       logger.debug("GET success: " + resp)
     }
-    response.raiseWithin(timeout.toMillis.milliseconds).map(parser.parseResult)
+    val timeout: Duration = Duration(config.defaultTimeout.toMillis, TimeUnit.MILLISECONDS)
+    val res = response.raiseWithin(timeout).map(parser.parseResult).flatMap {
+      case Success(s) => Future(s)
+      case Failure(f) => Future.exception(f)
+    }
+    val promise = Promise[R]()
+    res.onSuccess(promise.success(_))
+    res.onFailure(promise.failure(_))
+    promise.future
   }
 
 }
@@ -72,14 +87,14 @@ trait ResultParser[+R] {
    * @param response HttpResponse object.
    * @return Result of parsing.
    */
-  def parseResult(response: HttpResponse): R
+  def parseResult(response: HttpResponse): Try[R]
 }
 
 /**
  * Dummy parser used when no parsing is required.
  */
 class DummyParser extends ResultParser[HttpResponse] {
-  override def parseResult(response: HttpResponse): HttpResponse = response
+  override def parseResult(response: HttpResponse): Try[HttpResponse] = Try(response)
 }
 
 

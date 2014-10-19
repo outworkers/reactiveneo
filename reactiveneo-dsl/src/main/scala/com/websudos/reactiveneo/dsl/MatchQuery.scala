@@ -14,9 +14,11 @@
  */
 package com.websudos.reactiveneo.dsl
 
-import com.websudos.reactiveneo.query.{CypherOperators, BuiltQuery, CypherKeywords, CypherQueryBuilder}
+import com.websudos.reactiveneo.client.{ServerCall, SingleTransaction, RestClient}
+import com.websudos.reactiveneo.query.{BuiltQuery, CypherKeywords, CypherQueryBuilder}
 
 import scala.annotation.implicitNotFound
+import scala.concurrent.Future
 
 sealed trait RelationshipDirection
 
@@ -67,40 +69,36 @@ private[reactiveneo] class MatchQuery[
   WB <: WhereBind,
   RB <: ReturnBind,
   OB <: OrderBind,
-  LB <: LimitBind ](node: GO, builtQuery: BuiltQuery, aliases: Map[GraphObject[_, _], String]) extends CypherQueryBuilder {
+  LB <: LimitBind,
+  RT](node: GO,
+      builtQuery: BuiltQuery,
+      aliases: Map[GraphObject[_, _], String],
+      ret: Option[ReturnExpression[RT]] = None) extends CypherQueryBuilder {
 
 
   def query: String = builtQuery.queryString
 
 
   @implicitNotFound("You cannot use two where clauses on a single query")
-  final def where(condition: GO => Criteria[GO]): MatchQuery[GO, WhereBound, RB, OB, LB] = {
-    new MatchQuery[GO, WhereBound, RB, OB, LB](
+  final def where(condition: GO => Criteria[GO])(implicit ev: WB =:= WhereUnbound): MatchQuery[GO, WhereBound, RB, OB, LB, _] = {
+    new MatchQuery[GO, WhereBound, RB, OB, LB, Any] (
       node,
       where(builtQuery, condition(node).clause),
       aliases)
   }
 
-  final def returnAll: MatchQuery[GO, WB, ReturnBound, OB, LB]  = {
-    new MatchQuery[GO, WB, ReturnBound, OB, LB](
-      node,
-      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(CypherOperators.WILDCARD),
-      aliases)
-  }
-
-  final def returns(): MatchQuery[GO, WB, ReturnBound, OB, LB]  = {
-    new MatchQuery[GO, WB, ReturnBound, OB, LB](
-      node,
-      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(aliases.values.mkString(",")),
-      aliases)
-  }
-
-
-  final def returns(ret: GO => ReturnExpression[_]): MatchQuery[GO, WB, ReturnBound, OB, LB]  = {
-    new MatchQuery[GO, WB, ReturnBound, OB, LB](
+  final def returns[URT](ret: GO => ReturnExpression[URT]): MatchQuery[GO, WB, ReturnBound, OB, LB, URT]  = {
+    new MatchQuery[GO, WB, ReturnBound, OB, LB, URT] (
       node,
       builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(ret(node).query(aliases)),
-      aliases)
+      aliases,
+      Some(ret(node)))
+  }
+
+  @implicitNotFound("You need to add return clause to capture the type of result")
+  final def execute(implicit client: RestClient, ev: RB =:= ReturnBound): Future[Seq[RT]] = {
+    val call = ServerCall(SingleTransaction, ret.get, builtQuery.queryString)
+    call.execute
   }
 
 }
@@ -108,9 +106,9 @@ private[reactiveneo] class MatchQuery[
 private[reactiveneo] object MatchQuery {
 
 
-  def createRootQuery[GO <: Node[GO, _]](pattern: Pattern[GO], aliases: IndexedSeq[String]): MatchQuery[GO, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound] = {
+  def createRootQuery[GO <: Node[GO, _]](pattern: Pattern[GO], aliases: IndexedSeq[String]): MatchQuery[GO, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, _] = {
     val query = new BuiltQuery(CypherKeywords.MATCH).appendSpaced(pattern.clause)
-    new MatchQuery[GO, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound](
+    new MatchQuery[GO, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, Any](
       pattern.owner,
       query,
       Map(pattern.owner -> pattern.alias))
