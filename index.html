@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Reactiveneo by websudos</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Reactiveneo</h1>
+        <p>Reactive type-safe Scala DSL for Neo4J</p>
+
+        <p class="view"><a href="https://github.com/websudos/reactiveneo">View the Project on GitHub <small>websudos/reactiveneo</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/websudos/reactiveneo/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/websudos/reactiveneo/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/websudos/reactiveneo">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="reactiveneo" class="anchor" href="#reactiveneo"><span class="octicon octicon-link"></span></a>reactiveneo</h1>
+
+<p>Reactive typesafe Scala DSL for Neo4j</p>
+
+<p>The library enforces strong type checks that imposes some restrictions on query format. Every node and relationship
+used in the query needs to be defined and named.
+E.g. this kind of query is not supported:</p>
+
+<pre><code>MATCH (wallstreet { title:'Wall Street' })&lt;-[r:ACTED_IN]-(actor)
+RETURN r
+</code></pre>
+
+<p>Instead you will need to use proper labels for nodes to produce the following query:</p>
+
+<pre><code>MATCH (wallstreet:Movie { title:'Wall Street' })&lt;-[r:ACTED_IN]-(actor:Actor)
+RETURN r
+</code></pre>
+
+<h1>
+<a name="graph-modelling" class="anchor" href="#graph-modelling"><span class="octicon octicon-link"></span></a>Graph modelling</h1>
+
+<h2>
+<a name="nodes" class="anchor" href="#nodes"><span class="octicon octicon-link"></span></a>Nodes</h2>
+
+<p>Domain model class</p>
+
+<pre><code>case class Person(name: String, age: Int)
+</code></pre>
+
+<p>Reactiveneo node definition</p>
+
+<pre><code>import com.websudos.reactiveneo.dsl._
+
+class PersonNode extends Node[PersonNode, Person] {
+
+  object name extends StringAttribute with Index
+
+  object age extends IntegerAttribute
+
+  def fromNode(data: QueryRecord): Person = {
+    Person(name[String](data), age[Int](data))  
+  }
+
+}
+</code></pre>
+
+<h2>
+<a name="relationships" class="anchor" href="#relationships"><span class="octicon octicon-link"></span></a>Relationships</h2>
+
+<h2>
+<a name="indexes" class="anchor" href="#indexes"><span class="octicon octicon-link"></span></a>Indexes</h2>
+
+<h1>
+<a name="querying" class="anchor" href="#querying"><span class="octicon octicon-link"></span></a>Querying</h1>
+
+<p>In this example all nodes of Person type are returned.</p>
+
+<pre><code>scala&gt; val personNodes = matches[Person].return(p =&gt; p).execute
+personNodes: Future[Seq[Person]]
+</code></pre>
+
+<p>You can also query for specific attributes of a node.</p>
+
+<pre><code>scala&gt; val personNames = matches[Person].return(p =&gt; p.name).execute
+personNames: Future[Seq[String]]
+</code></pre>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/websudos">websudos</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
