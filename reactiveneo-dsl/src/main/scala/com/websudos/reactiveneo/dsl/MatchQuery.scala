@@ -15,7 +15,7 @@
 package com.websudos.reactiveneo.dsl
 
 import com.websudos.reactiveneo.client.{ServerCall, SingleTransaction, RestClient}
-import com.websudos.reactiveneo.query.{BuiltQuery, CypherKeywords, CypherQueryBuilder}
+import com.websudos.reactiveneo.query.{CypherOperators, BuiltQuery, CypherKeywords, CypherQueryBuilder}
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
@@ -80,19 +80,26 @@ private[reactiveneo] class MatchQuery[
 
 
   @implicitNotFound("You cannot use two where clauses on a single query")
-  final def where(condition: GO => Criteria[GO])(implicit ev: WB =:= WhereUnbound): MatchQuery[GO, WhereBound, RB, OB, LB, _] = {
-    new MatchQuery[GO, WhereBound, RB, OB, LB, Any] (
+  final def relatesTo(go: GraphObject[GO, _])(implicit ev: WB =:= WhereUnbound): MatchQuery[GO, WB, RB, OB, LB, _] = {
+    new MatchQuery[GO, WB, RB, OB, LB, Any] (
       node,
-      where(builtQuery, condition(node).clause),
+      builtQuery,
       aliases)
   }
 
-  final def returns[URT](ret: GO => ReturnExpression[URT]): MatchQuery[GO, WB, ReturnBound, OB, LB, URT]  = {
+  @implicitNotFound("You cannot use two where clauses on a single query")
+  final def where(condition: GO => Criteria[GO])(implicit ev: WB =:= WhereUnbound): MatchQuery[GO, WhereBound, RB, OB, LB, _] = {
+    new MatchQuery[GO, WhereBound, RB, OB, LB, Any] (
+      node,
+      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(CypherOperators.WILDCARD),
+      aliases)
+  }
+
+  final def returns[URT](ret: GO => ReturnExpression[URT]): MatchQuery[GO, WB, ReturnBound, OB, LB, URT] = {
     new MatchQuery[GO, WB, ReturnBound, OB, LB, URT] (
       node,
-      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(ret(node).query(aliases)),
-      aliases,
-      Some(ret(node)))
+      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(aliases.values.mkString(",")),
+      aliases)
   }
 
   @implicitNotFound("You need to add return clause to capture the type of result")

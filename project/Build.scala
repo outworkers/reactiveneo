@@ -21,11 +21,11 @@ import org.scalastyle.sbt.ScalastylePlugin
 
 object reactiveneo extends Build {
 
-  val newzlyUtilVersion = "0.1.19"
-  val scalatestVersion = "2.2.0-M1"
-  val finagleVersion = "6.17.0"
+  val UtilVersion = "0.4.0"
+  val ScalatestVersion = "2.2.0-M1"
+  val FinagleVersion = "6.20.0"
   val playVersion = "2.3.4"
-  val scalazVersion = "7.0.6"
+  val ScalazVersion = "7.1.0"
 
   val publishUrl = "http://maven.websudos.co.uk"
 
@@ -115,9 +115,9 @@ object reactiveneo extends Build {
       "com.chuusai"                  %  "shapeless_2.10.4"                  % "2.0.0",
       "com.github.nscala-time"       %% "nscala-time"                       % "1.0.0",
       "com.typesafe.scala-logging"   %% "scala-logging-slf4j"               % "2.1.2",
-      "com.newzly"                   %% "util-testing"                      % newzlyUtilVersion   % "test",
-      "org.scalaz"                   %% "scalaz-scalacheck-binding"         % scalazVersion       % "test",
-      "org.scalatest"                %% "scalatest"                         % scalatestVersion    % "test, provided",
+      "com.websudos"                 %% "util-testing"                      % UtilVersion   % "test",
+      "org.scalaz"                   %% "scalaz-scalacheck-binding"         % ScalazVersion       % "test",
+      "org.scalatest"                %% "scalatest"                         % ScalatestVersion    % "test, provided",
       "org.scalamock"                %% "scalamock-scalatest-support"       % "3.0.1"             % "test"
     ),
     fork in Test := true,
@@ -147,8 +147,8 @@ object reactiveneo extends Build {
     libraryDependencies ++= Seq(
       "com.chuusai"                  % "shapeless_2.10.4"                   % "2.0.0",
       "org.scala-lang"               %  "scala-reflect"                     % "2.10.4",
-      "com.twitter"                  %% "finagle-http"                      % finagleVersion,
-      "com.twitter"                  %% "util-core"                         % finagleVersion,
+      "com.twitter"                  %% "finagle-http"                      % FinagleVersion,
+      "com.twitter"                  %% "util-core"                         % FinagleVersion,
       "joda-time"                    %  "joda-time"                         % "2.3",
       "org.joda"                     %  "joda-convert"                      % "1.6",
       "com.typesafe.play"            %% "play-json"                         % playVersion,
@@ -165,8 +165,8 @@ object reactiveneo extends Build {
   ).settings(
     name := "reactiveneo-zookeeper",
     libraryDependencies ++= Seq(
-      "com.twitter"                  %% "finagle-serversets"                % finagleVersion,
-      "com.twitter"                  %% "finagle-zookeeper"                 % finagleVersion
+      "com.twitter"                  %% "finagle-serversets"                % FinagleVersion,
+      "com.twitter"                  %% "finagle-zookeeper"                 % FinagleVersion
     )
   )
 
@@ -177,13 +177,13 @@ object reactiveneo extends Build {
   ).settings(
     name := "reactiveneo-testing",
     libraryDependencies ++= Seq(
-      "com.twitter"                      %% "util-core"                % finagleVersion,
-      "com.newzly"                       %% "util-testing"             % newzlyUtilVersion,
-      "org.scalatest"                    %% "scalatest"                % scalatestVersion,
+      "com.twitter"                      %% "util-core"                % FinagleVersion,
+      "com.websudos"                     %% "util-testing"             % UtilVersion,
+      "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
       "org.scalacheck"                   %% "scalacheck"               % "1.11.3",
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
-      "com.twitter"                      %% "finagle-http"             % finagleVersion,
-      "com.twitter"                      %% "util-core"                % finagleVersion
+      "com.twitter"                      %% "finagle-http"             % FinagleVersion,
+      "com.twitter"                      %% "util-core"                % FinagleVersion
     )
   ).dependsOn(
     reactiveneoZookeeper

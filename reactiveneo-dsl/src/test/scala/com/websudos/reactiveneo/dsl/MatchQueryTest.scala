@@ -20,18 +20,23 @@ import Predicate._
 class MatchQueryTest extends FlatSpec with Matchers with ReturnImplicits {
 
   it should "build a simple query with a predicate" in {
-    matches[TestNode]( node => node.name := "Tom" ).returns(go => go).query shouldEqual "MATCH (a:TestNode {name:'Tom'}) RETURN a "
+    TestNode( node => node.name := "Tom" ).returns(go => go).query shouldEqual "MATCH (a:TestNode {name:'Tom'}) RETURN a "
   }
 
+  it should "build a simple query with a predicate using conversion" in {
+    TestNode( node => node.name := "Tom" ).returns(go => go).query shouldEqual "MATCH (a:TestNode {name:'Tom'}) RETURN a "
+  }
+
+
   it should "build a simple query without any predicate" in {
-    matches[TestNode]().returns(n => n).query shouldEqual "MATCH (a:TestNode) RETURN a "
+    TestNode().returns(n => n).query shouldEqual "MATCH (a:TestNode) RETURN a "
   }
 
   it should "build a query returning single object" in {
-    matches[TestNode]().returns(n => n).query shouldEqual "MATCH (a:TestNode) RETURN a "
+    TestNode().returns(n => n).query shouldEqual "MATCH (a:TestNode) RETURN a "
   }
 
   it should "build a query returning object attribute" in {
-    matches[TestNode]().returns(_.name).query shouldEqual "MATCH (a:TestNode) RETURN a.name "
+    TestNode().returns(_.name).query shouldEqual "MATCH (a:TestNode) RETURN a.name "
   }
 }

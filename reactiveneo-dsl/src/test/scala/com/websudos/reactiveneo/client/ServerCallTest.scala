@@ -16,9 +16,9 @@ package com.websudos.reactiveneo.client
 
 import com.websudos.reactiveneo.dsl.{ObjectReturnExpression, TestNode, TestNodeRecord}
 import org.scalatest.{Matchers, FlatSpec}
-import com.newzly.util.testing.AsyncAssertionsHelper._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import com.websudos.util.testing._
 
 class ServerCallTest extends FlatSpec with Matchers with ServerMockSugar {
 

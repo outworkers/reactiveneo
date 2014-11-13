@@ -30,10 +30,10 @@ class CypherResultParserTest extends FlatSpec with Matchers {
         |    "columns":["a"],
         |    "data":[
         |      {
-        |        "row":["test1"]
+        |        "row":[{"name":"test1"}]
         |      },
         |      {
-        |        "row":["test2"]
+        |        "row":[{"name":"test2"}]
         |      }
         |    ]
         |  }],

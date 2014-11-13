@@ -49,7 +49,7 @@ private[reactiveneo] case class Predicate[T](
   attribute: AbstractAttribute[T], value: T)(implicit formatter: ValueFormatter[T]) {
 
   val clause: BuiltQuery = {
-    if(value == null)
+    if (value == null)
       throw new IllegalArgumentException("NULL is not allowed value to be used in predicate.")
     new BuiltQuery(attribute.name).append(CypherOperators.COLON).append(value)
   }

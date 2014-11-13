@@ -19,7 +19,8 @@ package com.websudos.reactiveneo.dsl
  *
  * User needs to extend this class when defining nodes he/she wants to use in the queries.
  */
-abstract class Relationship[Owner <: Relationship[Owner, Record], Record] extends GraphObject[Owner, Record] {
+abstract class Relationship[Owner <: Relationship[Owner, Record], Record]
+  extends GraphObject[Owner, Record] {
 
 
 }

@@ -28,3 +28,5 @@ class TestNode extends Node[TestNode, TestNodeRecord] {
     TestNodeRecord(name(data))
   }
 }
+
+object TestNode extends TestNode
