@@ -17,6 +17,8 @@ package com.websudos.reactiveneo.client
 import com.websudos.reactiveneo.dsl.ReturnExpression
 import org.jboss.netty.handler.codec.http.HttpMethod
 
+import scala.concurrent.Future
+
 /**
  * REST API endpoints definitions.
  * @param path Server query path.
@@ -42,7 +44,7 @@ class ServerCall[RT](endpoint: RestEndpoint, content: Option[String], returnExpr
   }
 
 
-  def execute = {
+  def execute: Future[Seq[RT]] = {
     val result = client.makeRequest[Seq[RT]](endpoint.path, endpoint.method)
     result
   }

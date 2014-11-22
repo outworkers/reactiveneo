@@ -35,4 +35,18 @@ trait MatchQueryImplicits {
     MatchQuery.createRootQuery(pattern, nodeAliases.tail)
   }
 
+  /**
+   * Conversion that simplifies query building. It allows to build the query directly from a pattern.
+   * ```
+   * PersonNode(p=>p.name := "Mark").returns(p=>p)
+   * ```
+   * @param p Predicate that forms initial node for the query
+   * @tparam N Type of start node.
+   * @return Returns query object.
+   */
+  implicit def patternToQuery[N <: Node[N, _]](p: Pattern[N]): MatchQuery[N, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, _] = {
+    MatchQuery.createRootQuery(p, nodeAliases.tail)
+  }
+
+
 }
