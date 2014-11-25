@@ -15,18 +15,10 @@
 package com.websudos.reactiveneo.dsl
 
 import com.websudos.reactiveneo.client.{ServerCall, SingleTransaction, RestClient}
-import com.websudos.reactiveneo.query.{CypherOperators, BuiltQuery, CypherKeywords, CypherQueryBuilder}
+import com.websudos.reactiveneo.query.{BuiltQuery, CypherKeywords, CypherQueryBuilder}
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
-
-sealed trait RelationshipDirection
-
-private[reactiveneo] abstract class Any extends RelationshipDirection
-
-private[reactiveneo] abstract class Left extends RelationshipDirection
-
-private[reactiveneo] abstract class Right extends RelationshipDirection
 
 sealed trait RelationshipBind
 
@@ -60,19 +52,19 @@ private[reactiveneo] abstract class LimitUnbound extends LimitBind
 
 /**
  * Query builder is responsible for encapsulating nodes information and selection criteria.
- * @param node Initial node to query against.
+ * @param pattern Pattern this query is build against.
  * @param builtQuery Current query string.
- * @param aliases Map of added node types to corresponding alias value used in RETURN clause.
+ * @param context Map of added node types to corresponding alias value used in RETURN clause.
  */
 private[reactiveneo] class MatchQuery[
-  GO <: Node[GO, _],
+  P  <: Pattern,
   WB <: WhereBind,
   RB <: ReturnBind,
   OB <: OrderBind,
   LB <: LimitBind,
-  RT](node: GO,
+  RT](pattern: P,
       builtQuery: BuiltQuery,
-      aliases: Map[GraphObject[_, _], String],
+      context: QueryBuilderContext,
       ret: Option[ReturnExpression[RT]] = None) extends CypherQueryBuilder {
 
 
@@ -80,26 +72,20 @@ private[reactiveneo] class MatchQuery[
 
 
   @implicitNotFound("You cannot use two where clauses on a single query")
-  final def relatesTo(go: GraphObject[GO, _])(implicit ev: WB =:= WhereUnbound): MatchQuery[GO, WB, RB, OB, LB, _] = {
-    new MatchQuery[GO, WB, RB, OB, LB, Any] (
-      node,
-      builtQuery,
-      aliases)
+  final def where(condition: P => Criteria[_])
+                 (implicit ev: WB =:= WhereUnbound): MatchQuery[P, WhereBound, RB, OB, LB, _] = {
+    new MatchQuery[P, WhereBound, RB, OB, LB, Any] (
+      pattern,
+      where(builtQuery, condition(pattern).clause),
+      context)
   }
 
-  @implicitNotFound("You cannot use two where clauses on a single query")
-  final def where(condition: GO => Criteria[GO])(implicit ev: WB =:= WhereUnbound): MatchQuery[GO, WhereBound, RB, OB, LB, _] = {
-    new MatchQuery[GO, WhereBound, RB, OB, LB, Any] (
-      node,
-      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(CypherOperators.WILDCARD),
-      aliases)
-  }
-
-  final def returns[URT](ret: GO => ReturnExpression[URT]): MatchQuery[GO, WB, ReturnBound, OB, LB, URT] = {
-    new MatchQuery[GO, WB, ReturnBound, OB, LB, URT] (
-      node,
-      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(aliases.values.mkString(",")),
-      aliases)
+  final def returns[URT](ret: P => ReturnExpression[URT]): MatchQuery[P, WB, ReturnBound, OB, LB, URT]  = {
+    new MatchQuery[P, WB, ReturnBound, OB, LB, URT] (
+      pattern,
+      builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(ret(pattern).query(context)),
+      context,
+      Some(ret(pattern)))
   }
 
   @implicitNotFound("You need to add return clause to capture the type of result")
@@ -113,11 +99,15 @@ private[reactiveneo] class MatchQuery[
 private[reactiveneo] object MatchQuery {
 
 
-  def createRootQuery[GO <: Node[GO, _]](pattern: Pattern[GO], aliases: IndexedSeq[String]): MatchQuery[GO, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, _] = {
-    val query = new BuiltQuery(CypherKeywords.MATCH).appendSpaced(pattern.clause)
-    new MatchQuery[GO, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, Any](
-      pattern.owner,
+  def createRootQuery[P <: Pattern](
+                          pattern: P,
+                          context: QueryBuilderContext):
+                            MatchQuery[P, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, _] = {
+    pattern.foreach(context.nextLabel(_))
+    val query = new BuiltQuery(CypherKeywords.MATCH).appendSpaced(pattern.queryClause(context))
+    new MatchQuery[P, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, Any](
+      pattern,
       query,
-      Map(pattern.owner -> pattern.alias))
+      context)
   }
 }

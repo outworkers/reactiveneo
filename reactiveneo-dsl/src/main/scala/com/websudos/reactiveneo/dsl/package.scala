@@ -14,7 +14,9 @@
  */
 package com.websudos.reactiveneo
 
-package object dsl extends DefaultImports with ReturnImplicits {
-
-}
+package object dsl
+  extends DefaultImports
+  with ReturnImplicits
+  with ImplicitConversions
+  with PredicateOps
 

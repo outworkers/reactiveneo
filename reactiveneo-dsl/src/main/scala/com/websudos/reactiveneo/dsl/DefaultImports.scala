@@ -19,7 +19,7 @@ import com.websudos.reactiveneo.query.DefaultFormatters.{BooleanFormatter, Doubl
 /**
  * Implicit definitions used in DSL.
  */
-trait DefaultImports extends MatchQueryImplicits with ImplicitConversions {
+trait DefaultImports {
 
   implicit val stringFormatter = new StringFormatter
   implicit val intFormatter = new IntegerFormatter
