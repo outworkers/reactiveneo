@@ -45,12 +45,12 @@ abstract class JsonParser[R] extends ResultParser[R] {
 
   private[this] def singleErrorMessage(error: (JsPath, scala.Seq[ValidationError])) = {
     val (path: JsPath, errors: Seq[ValidationError]) = error
-    val message = errors.foldLeft(errors.head.message)((acc, err) => s"$acc,${err.message}")
+    val message = errors.foldLeft(errors.head.message)((acc,err) => s"$acc,${err.message}")
     s"Errors at $path: $message"
   }
 
   private[client] def buildErrorMessage(error: JsError) = {
-    error.errors.tail.foldLeft(singleErrorMessage(error.errors.head))((acc, err) => s"acc,${singleErrorMessage(err)}")
+    error.errors.tail.foldLeft(singleErrorMessage(error.errors.head))((acc,err) => s"acc,${singleErrorMessage(err)}")
   }
 
   override def parseResult(response: HttpResponse): Try[R] = {

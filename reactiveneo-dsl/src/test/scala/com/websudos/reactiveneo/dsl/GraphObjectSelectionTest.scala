@@ -14,23 +14,25 @@
  */
 package com.websudos.reactiveneo.dsl
 
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
-class AttributeReturnExpressionTest extends FlatSpec with Matchers {
 
-  it should "serialize to valid return statement" in {
-    val node = new TestNode
+class GraphObjectSelectionTest extends FlatSpec with Matchers {
+
+  it should "serialize simple pattern to a string" in {
     val context = new QueryBuilderContext
-    context.register(node, "abc")
-    AttributeReturnExpression(node.name).query(context).queryString shouldEqual "abc.name"
+    val node = new TestNode
+    val label = context.nextLabel(node)
+    GraphObjectSelection(node).queryClause(context).queryString shouldEqual s"($label:TestNode)"
   }
 
 
-  it should "convert to return expression" in {
-    val node = new TestNode
+  it should "serialize pattern with criteria to a string" in {
     val context = new QueryBuilderContext
-    context.register(node, "abc")
-    (node.name:AttributeReturnExpression[TestNode, TestNodeRecord, String]).query(context).queryString shouldEqual "abc.name"
+    val owner = new TestNode
+    val label = context.nextLabel(owner)
+    GraphObjectSelection(owner, Predicate(owner.name, "Tom")).queryClause(context).queryString shouldEqual s"""($label:TestNode {name:'Tom'})"""
   }
-
 }
+
+

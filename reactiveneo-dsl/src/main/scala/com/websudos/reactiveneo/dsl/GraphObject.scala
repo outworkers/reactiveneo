@@ -66,9 +66,9 @@ private[reactiveneo] abstract class GraphObject[Owner <: GraphObject[Owner, Reco
    * Constructs a pattern for the class related to this accompanying object.
    */
   def apply(predBuilder: (Owner => Predicate[_])*)
-                                           (implicit m: Manifest[Owner]): Pattern[Owner] = {
+                                           (implicit m: Manifest[Owner]) = {
     val obj = m.runtimeClass.newInstance().asInstanceOf[Owner]
-    val pattern = Pattern(obj, nodeAliases.head, predBuilder.map(pred => pred(obj)): _*)
+    val pattern = GraphObjectSelection(obj, predBuilder.map(pred => pred(obj)): _*)
     pattern
   }
 

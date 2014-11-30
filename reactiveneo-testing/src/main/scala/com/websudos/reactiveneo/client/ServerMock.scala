@@ -16,20 +16,18 @@ package com.websudos.reactiveneo.client
 
 import java.net.InetSocketAddress
 
+import com.websudos.util.testing._
+import com.twitter.finagle.Service
+import com.twitter.finagle.builder.{ServerBuilder, Server}
+import com.twitter.finagle.http.Http
+import com.twitter.io.Charsets._
+import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffers._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponse}
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.SpanSugar._
-
-import com.twitter.finagle.Service
-import com.twitter.finagle.builder.{ServerBuilder, Server}
-import com.twitter.finagle.http.Http
-import com.twitter.io.Charsets._
-import com.twitter.util.Future
-
-import com.websudos.util.testing._
 
 /**
  * A simple server to be used in testing. Server is occupying a socket and therefore should be closed after the test.

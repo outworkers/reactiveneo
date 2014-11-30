@@ -14,19 +14,23 @@
  */
 package com.websudos.reactiveneo.dsl
 
-import com.websudos.reactiveneo.attribute.StringAttribute
+import com.websudos.reactiveneo.attribute.IntegerAttribute
 import com.websudos.reactiveneo.query.QueryRecord
 
-case class TestNodeRecord(name: String)
+case class TestRelationRecord(year: Int)
+
+/**
+ * An implementation of Relation object.
+ */
+class TestRelationship extends Relationship[TestRelationship, TestRelationRecord] {
+
+  object year extends IntegerAttribute(this)
 
 
-class TestNode extends Node[TestNode, TestNodeRecord] {
-
-  object name extends StringAttribute(this)
-
-  override def fromQuery(data: QueryRecord): TestNodeRecord = {
-    TestNodeRecord(name(data))
+  override def fromQuery(data: QueryRecord): TestRelationRecord = {
+    TestRelationRecord(year(data))
   }
+
 }
 
-object TestNode extends TestNode
+object TestRelationship extends TestRelationship

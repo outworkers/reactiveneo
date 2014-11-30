@@ -1,3 +1,5 @@
+import org.scalatest.{Matchers, FlatSpec}
+
 /*
  * Copyright 2014 websudos ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,21 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.websudos.reactiveneo.dsl
 
-import com.websudos.reactiveneo.attribute.StringAttribute
-import com.websudos.reactiveneo.query.QueryRecord
+class Something(val a: Int, val b: String)
 
-case class TestNodeRecord(name: String)
-
-
-class TestNode extends Node[TestNode, TestNodeRecord] {
-
-  object name extends StringAttribute(this)
-
-  override def fromQuery(data: QueryRecord): TestNodeRecord = {
-    TestNodeRecord(name(data))
+object -- {
+  def unapply(o: Something): Option[(Int,String)] = {
+    Some((o.a, o.b))
   }
 }
 
-object TestNode extends TestNode
+class TestIt extends FlatSpec with Matchers {
+
+  it should "work" in {
+    val obj = new Something(1, "b")
+    obj match {
+      case a -- b => a
+    }
+  }
+
+}

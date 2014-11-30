@@ -87,45 +87,48 @@ class PersonRelation extends Relationship[PersonRelation, Person] {
 
 In this example all nodes of Person type are returned.
 ```
-scala> val personNodes = Person.returns(p => p).execute
+scala> val personNodes = Person().returns(case p ~~ _ => p).execute
 personNodes: Future[Seq[Person]]
 ```
 
+The strange construct in the returns function is execution of extractor in the pattern. Pattern defines set of objects
+that participate in the query. The objects are nodes and relationships.
+
 You can also query for specific attributes of a node.
 ```
-scala> val personNames = Person.returns(p => p.name).execute
+scala> val personNames = Person().returns(case p ~~ _ => p.name).execute
 personNames: Future[Seq[String]]
 ```
 
 A query that involves attributes matching.
 ```
-scala> val personNodes = Person( p => p.name := "Tom" ).returns(p => p).execute
+scala> val personNodes = Person(_.name := "Tom").returns(case p ~~ _ => p).execute
 personNodes: Future[Seq[Person]]
 ```
 
 Query for a person that has a relationship to another person
 ```
-scala> val personNodes = Person.relatedTo[Person].returns(p => p).execute
+scala> val personNodes = (Person() :->: Person()).returns(case p1 ~~ _ => p).execute
 personNodes: Future[Seq[Person]]
 ```
 
 Query for a person that has a relationship to another person with given name
 ```
-scala> val personNodes = Person.relatedTo(Person(p => p.name := "James").returns(p => p).execute
+scala> val personNodes = (Person() :->: Person(_.name := "James")).returns(case p ~~ _ => p).execute
 personNodes: Future[Seq[Person]]
 ```
 
 
 Query for a person that has a relationship to another person
 ```
-scala> val personNodes = Person.relatedTo(WorkRelationship :-> Person).returns((p1,r,p2) => p1).execute
+scala> val personNodes = (Person() :<-: WorkRelationship() :->: Person()).returns(case p1 ~~ r ~~ p2 ~~ _ => p1).execute
 personNodes: Future[Seq[Person]]
 ```
 
 
 Query for a person that has a relationship to another person with given name
 ```
-scala> val personNodes = Person.relatedTo(WorkRelationship(r => r.company := "ABC") :-> Person(p => p.name := "John"))
-                         returns((p1,r,p2) => p1).execute
+scala> val personNodes = (Person() :-: WorkRelationship(_.company := "ABC") :->: Person(_.name := "John"))
+                         .returns(case p1 ~~ _ => p1).execute
 personNodes: Future[Seq[Person]]
 ```

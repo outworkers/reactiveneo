@@ -14,54 +14,92 @@
  */
 package com.websudos.reactiveneo.dsl
 
-import com.websudos.reactiveneo.attribute.AbstractAttribute
-import com.websudos.reactiveneo.query.{ValueFormatter, CypherOperators, BuiltQuery}
+sealed trait Direction {
+  def symbol: String
+
+  override def toString: String = symbol
+}
+
+object Left extends Direction {
+  override def symbol: String = "<-"
+}
+
+object Right extends Direction {
+  override def symbol: String = "->"
+}
+
+object Both extends Direction {
+  override def symbol: String = "-"
+}
 
 /**
- * Pattern class represents a graph object with an alias and a condition applied to it. Cypher representation of
- * a pattern is ```(n: Label { name = "Mark" })```
+ * Used for the first link in the pattern.
  */
-private[reactiveneo] case class Pattern[Owner <: GraphObject[Owner, _]](
-   owner: Owner,
-   alias: String,
-   predicates: Predicate[_]*) {
+object Start extends Direction {
+  override def symbol: String = ""
+}
+
+/**
+ * ADT root for Pattern object.
+ */
+sealed trait Pattern {
+
+  def queryClause( context: QueryBuilderContext ): String
 
   /**
-   * Builds a query string of alias, object name and criteria if some.
+   * Iterates all nodes and relationships objects in the pattern.
+   * @param action Action to be applied to every single node and relationship
    */
-  val clause: BuiltQuery = {
-    val predicatesQuery = if(predicates.nonEmpty) {
-      Some(predicates.tail.foldLeft(predicates.head.clause)((agg, next) => agg.append(",").append(next.clause)))
-    } else {
-      None
+  def foreach( action: GraphObject[_,_] => Unit ): Unit = {
+    this match {
+      case p: PatternLink[_, _] =>
+        action(p.node.owner: GraphObject[_,_])
+        p.next.foreach(action)
+      case _ => //end of story
     }
-    BuiltQuery(s"$alias:${owner.objectName}").append(predicatesQuery.map(" {" + _.queryString + "}").getOrElse("")).wrapped
   }
-
 }
 
 /**
- * Predicate filtering nodes by attribute value.
- * @param attribute Attribute to filter.
- * @param value Lookup value
+ * Relation defines path to other node in the query. It defines relationship between the nodes and direction
+ * to/from the relationship.
+ * n - r - n - r - n
  */
-private[reactiveneo] case class Predicate[T](
-  attribute: AbstractAttribute[T], value: T)(implicit formatter: ValueFormatter[T]) {
+final case class PatternLink[GO <: GraphObject[GO, _], PC <: Pattern]( dir: Direction,
+                                                                       node: GraphObjectSelection[GO],
+                                                                       next: PC = PNil )
+  extends Pattern {
 
-  val clause: BuiltQuery = {
-    if (value == null)
-      throw new IllegalArgumentException("NULL is not allowed value to be used in predicate.")
-    new BuiltQuery(attribute.name).append(CypherOperators.COLON).append(value)
+  def queryClause( context: QueryBuilderContext ): String = {
+    s"${node.queryClause(context)} $dir ${next.queryClause(context)}"
+  }
+
+  //TODO: use phantom type to mark the pattern as closed when it is finished with node or open when finished with a relationship
+  def :->:[N <: GraphObject[N, _]]( go: GraphObjectSelection[N] ) = {
+    PatternLink(Right, go, this)
+  }
+
+  def :<-:[N <: GraphObject[N, _]]( go: GraphObjectSelection[N] ) = {
+    PatternLink(Left, go, this)
+  }
+
+  def :-:[N <: GraphObject[N, _]]( go: GraphObjectSelection[N] ) = {
+    PatternLink(Both, go, this)
   }
 
 }
 
-object Predicate {
-  implicit class PredicateFunctions[V](attr: AbstractAttribute[V])(implicit formatter: ValueFormatter[V]) {
 
-    implicit def :=(value: V): Predicate[V] = {
-      new Predicate[V](attr, value)
-    }
+sealed trait PNil extends Pattern
 
+case object PNil extends PNil {
+  override def queryClause( context: QueryBuilderContext ): String = ""
+}
+
+object ~~ {
+
+  def unapply[GO <: GraphObject[GO, _], PC <: Pattern]( link: PatternLink[GO, PC] ): Option[(GO, Pattern)] = {
+    Some((link.node.owner, link.next))
   }
+
 }

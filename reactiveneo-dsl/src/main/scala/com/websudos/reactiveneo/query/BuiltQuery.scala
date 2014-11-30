@@ -22,9 +22,9 @@ case class BuiltQuery(queryString: String) {
   def this() = this("")
 
 
-  def wrap(str: String): BuiltQuery = pad.append("(").append(str).append(")")
+  def wrap(str: String,open: String = "(", close: String = ")"): BuiltQuery = pad.append(open).append(str).append(close)
   def wrap(query: BuiltQuery): BuiltQuery = wrap(query.queryString)
-  def wrapped: BuiltQuery = BuiltQuery(s"($queryString)")
+  def wrapped(open: String = "(", close: String = ")"): BuiltQuery = BuiltQuery(s"$open$queryString$close")
 
   def append(str: String): BuiltQuery = new BuiltQuery(queryString + str)
   def append(query: BuiltQuery): BuiltQuery = new BuiltQuery(queryString + query.queryString)
@@ -42,6 +42,7 @@ case class BuiltQuery(queryString: String) {
   def forcePad: BuiltQuery = BuiltQuery(queryString + " ")
   def trim: BuiltQuery = BuiltQuery(queryString.trim)
 
+  override def toString: String = queryString
 }
 
 /**

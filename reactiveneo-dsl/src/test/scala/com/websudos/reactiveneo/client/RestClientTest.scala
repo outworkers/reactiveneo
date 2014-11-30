@@ -15,15 +15,16 @@
 package com.websudos.reactiveneo.client
 
 import java.net.InetSocketAddress
+import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
+import com.websudos.util.testing._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{Server, ServerBuilder}
 import com.twitter.finagle.http.Http
 import com.twitter.io.Charsets.Utf8
 import com.twitter.util.Future
 import com.websudos.reactiveneo.client.RestClient._
-import com.websudos.util.testing._
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
@@ -32,9 +33,9 @@ import org.scalatest._
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.SpanSugar._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
 
@@ -62,7 +63,7 @@ class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
       val result = client.makeRequest("/")
       result.successful { res =>
         res.getStatus.getCode should equal(200)
-        res.getContent.toString(Utf8) should equal("neo")
+        res.getContent.toString(Charset.forName("UTF-8")) should equal("neo")
       }
     }
 
@@ -71,7 +72,7 @@ class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
       val client = new RestClient(ClientConfiguration("localhost", 6666, FiniteDuration(10, TimeUnit.SECONDS)))
       implicit val parser = new ResultParser[String] {
         override def parseResult(response: HttpResponse): Try[String] = {
-          Try(response.getContent.toString(Utf8))
+          Try(response.getContent.toString(Charset.forName("UTF-8")))
         }
       }
       val result: scala.concurrent.Future[String] = client.makeRequest("/")
