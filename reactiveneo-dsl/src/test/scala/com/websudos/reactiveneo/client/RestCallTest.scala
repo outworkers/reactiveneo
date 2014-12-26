@@ -20,7 +20,7 @@ import com.websudos.util.testing._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ServerCallTest extends FlatSpec with Matchers with ServerMockSugar {
+class RestCallTest extends FlatSpec with Matchers with ServerMockSugar {
 
   it should "execute call and parse result" in {
     val testNode = new TestNode
@@ -40,7 +40,7 @@ class ServerCallTest extends FlatSpec with Matchers with ServerMockSugar {
         val configuration = ClientConfiguration(addr.getHostName, addr.getPort, 1 second)
         implicit val client = new RestClient(configuration)
 
-        val call = ServerCall(SingleTransaction, retEx, "match (tn: TestNode) return tn")
+        val call = RestCall(SingleTransaction, retEx, "match (tn: TestNode) return tn")
         val result = call.execute
         result successful { res =>
           res should have length 1

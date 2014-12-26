@@ -14,18 +14,17 @@
  */
 package com.websudos.reactiveneo.client
 
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{ Matchers, FlatSpec }
 
 class ServerMockTest extends FlatSpec with Matchers with ServerMockSugar {
 
   it should "return a listening port" in {
-    val server = new ServerMock( _ => "hello")
+    val server = new ServerMock(_ => "hello")
     server.port should be > 0
   }
 
-
   it should "return a host name" in {
-    val server = new ServerMock( _ => "hello")
+    val server = new ServerMock(_ => "hello")
     server.host shouldEqual "localhost"
   }
 }
