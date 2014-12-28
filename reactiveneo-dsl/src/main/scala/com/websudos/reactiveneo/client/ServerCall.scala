@@ -17,7 +17,9 @@ package com.websudos.reactiveneo.client
 import scala.concurrent.Future
 
 /**
- * Abstraction of communication with a server.
+ * Abstraction of communication with a server. The idea of this trait is to represent fully initialized definition of
+ * server call statement.
+ *
  * @tparam RT type of server response
  */
 trait ServerCall[RT] {

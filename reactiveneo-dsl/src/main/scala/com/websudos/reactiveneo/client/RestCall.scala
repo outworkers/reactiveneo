@@ -14,7 +14,8 @@
  */
 package com.websudos.reactiveneo.client
 
-import com.websudos.reactiveneo.dsl.{MatchQuery, ReturnExpression}
+import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.websudos.reactiveneo.dsl.{ MatchQuery, ReturnExpression }
 import org.jboss.netty.handler.codec.http.HttpMethod
 
 import scala.concurrent.Future
@@ -35,8 +36,9 @@ class RollbackTransaction(transactionId: Int) extends RestEndpoint(s"/db/data/tr
  * Model of a call to Neo4j server.
  * @tparam RT Type of result call response.
  */
-class RestCall[RT](endpoint: RestEndpoint, content: Option[String], returnExpression: ReturnExpression[RT])
-                    (implicit client: RestClient) {
+class RestCall[RT](endpoint: RestEndpoint, content: Option[String], returnExpression: ReturnExpression[RT])(implicit client: RestClient)
+    extends ServerCall[Seq[RT]]
+    with LazyLogging {
 
   implicit lazy val parser = {
     val parser = new CypherResultParser[RT]()(returnExpression.resultParser)
@@ -44,7 +46,7 @@ class RestCall[RT](endpoint: RestEndpoint, content: Option[String], returnExpres
   }
 
   def execute: Future[Seq[RT]] = {
-    val result = client.makeRequest[Seq[RT]](endpoint.path, endpoint.method)
+    val result = client.makeRequest[Seq[RT]](endpoint.path, endpoint.method, content)
     result
   }
 
@@ -68,7 +70,7 @@ trait RestCallService {
 
   implicit def client: RestClient
 
-  implicit def makeRequest[RT <: MatchQuery[_,_,_,_,_,RT]](matchQuery: MatchQuery[_,_,_,_,_,RT]): RestCall[RT] = {
+  implicit def makeRequest[RT <: MatchQuery[_, _, _, _, _, RT]](matchQuery: MatchQuery[_, _, _, _, _, RT]): RestCall[RT] = {
     val (query, retType) = matchQuery.finalQuery
     val call = RestCall(SingleTransaction, retType, query)
     call

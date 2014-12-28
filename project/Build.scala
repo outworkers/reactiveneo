@@ -151,7 +151,8 @@ object reactiveneo extends Build {
       "com.twitter"                  %% "util-core"                         % "6.23.0",
       "joda-time"                    %  "joda-time"                         % "2.3",
       "org.joda"                     %  "joda-convert"                      % "1.6",
-      "com.typesafe.play"            %% "play-json"                         % playVersion
+      "com.typesafe.play"            %% "play-json"                         % playVersion,
+      "org.neo4j"                    % "neo4j-cypher"                       % Neo4jVersion
     )
   ).dependsOn(
     reactiveneoTesting % "test, provided"
