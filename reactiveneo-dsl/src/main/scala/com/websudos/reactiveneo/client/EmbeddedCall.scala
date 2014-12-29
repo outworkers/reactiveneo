@@ -18,8 +18,8 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import com.websudos.reactiveneo.dsl.MatchQuery
 import org.neo4j.cypher.javacompat.ExecutionEngine
 import org.neo4j.graphdb.GraphDatabaseService
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 /**
