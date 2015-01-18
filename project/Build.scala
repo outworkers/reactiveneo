@@ -21,10 +21,14 @@ import org.scalastyle.sbt.ScalastylePlugin
 
 object reactiveneo extends Build {
 
+  val scalaMajorVersion = "2.11"
+  val scalaMinorVersion = "5"
+  val scalaFullVersion = scalaMajorVersion + "." + scalaMinorVersion
+
   val UtilVersion = "0.5.0"
   val ScalatestVersion = "2.2.1"
   val FinagleVersion = "6.24.0"
-  val playVersion = "2.3.6"
+  val playVersion = "2.3.7"
   val ScalazVersion = "7.1.0"
   val Neo4jVersion = "2.1.6"
 
@@ -87,7 +91,7 @@ object reactiveneo extends Build {
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
     organization := "com.websudos",
     version := "0.1.2",
-    scalaVersion := "2.11.4",
+    scalaVersion := scalaFullVersion,
     resolvers ++= Seq(
       "Typesafe repository snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
       "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/",
@@ -146,7 +150,7 @@ object reactiveneo extends Build {
   ).settings(
     name := "reactiveneo-dsl",
     libraryDependencies ++= Seq(
-      "org.scala-lang"               %  "scala-reflect"                     % "2.11.4",
+      "org.scala-lang"               %  "scala-reflect"                     % scalaFullVersion,
       "com.twitter"                  %% "finagle-http"                      % FinagleVersion,
       "com.twitter"                  %% "util-core"                         % "6.23.0",
       "joda-time"                    %  "joda-time"                         % "2.3",

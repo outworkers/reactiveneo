@@ -38,13 +38,14 @@ class EmbeddedCall[RT](query: String)
       val result = engine.execute(query)
       Future.successful(result.iterator().asScala.map(_.values().asScala.head.asInstanceOf[RT]).toSeq)
     } catch {
-      case ex =>
+      case ex: Exception =>
         logger.error("Failed to execute call")
         Future.failed(ex)
     }
   }
 
 }
+
 
 /**
  * Service that prepares and executes rest call
