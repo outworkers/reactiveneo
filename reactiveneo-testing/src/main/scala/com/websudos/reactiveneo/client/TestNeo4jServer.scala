@@ -21,12 +21,16 @@ import org.jboss.netty.buffer.ChannelBuffers._
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.codec.http.HttpVersion._
+import org.neo4j.cypher.ExecutionEngine
 import org.neo4j.graphdb.GraphDatabaseService
 import org.neo4j.test.TestGraphDatabaseFactory
 import org.scalatest.Suite
 
+import scala.util.Try
+
 /**
- * A base for tests that require embedded Neo4j
+ * A base for tests that require embedded Neo4j. It leverages [[com.websudos.reactiveneo.client.ServerMock]]
+ * to handle http requests.
  */
 trait TestNeo4jServer extends Suite {
 
@@ -35,13 +39,16 @@ trait TestNeo4jServer extends Suite {
   var server: ServerMock = _
 
   override protected def withFixture(test: NoArgTest) = {
-    new TestGraphDatabaseFactory().newImpermanentDatabase()
     db = new TestGraphDatabaseFactory().newImpermanentDatabase()
+    val engine =  new ExecutionEngine( db )
+
     server = new ServerMock (req => {
       val query = req.getContent.toString(Charset.defaultCharset())
-
+      val tx = db.beginTx()
+      val result = engine.execute(query)
+      tx.success()
       val response = new DefaultHttpResponse(HTTP_1_1, OK)
-      response.setContent(copiedBuffer(???, Utf8))
+      response.setContent(copiedBuffer(result.dumpToString(), Utf8))
       response
     })
     try super.withFixture(test) finally db.shutdown()

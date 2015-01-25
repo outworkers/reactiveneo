@@ -60,7 +60,7 @@ class ServerMock(handler: (HttpRequest) => HttpResponse) {
 
 trait ServerMockSugar {
 
-  implicit def fromString(contents: String): DefaultHttpResponse = {
+  implicit def stringResponse(contents: String): DefaultHttpResponse = {
     val response = new DefaultHttpResponse(HTTP_1_1, OK)
     response.setContent(copiedBuffer(contents, Utf8))
     response

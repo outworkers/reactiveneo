@@ -187,7 +187,7 @@ object reactiveneo extends Build {
       "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
       "org.scalacheck"                   %% "scalacheck"               % "1.11.3",
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
-      "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile",
+      "org.neo4j"                        %  "neo4j-cypher"             % Neo4jVersion % "compile",
       "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile"
         classifier "tests"
     )
