@@ -59,6 +59,7 @@ case class ObjectReturnExpression[GO <: GraphObject[GO, R], R](go: GraphObject[G
       go.fromQuery(QueryRecord(obj))
     }
   }
+
 }
 
 

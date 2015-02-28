@@ -17,7 +17,7 @@ package com.websudos.reactiveneo.query
 import play.api.libs.json.{Reads, JsObject}
 
 /**
- * Wraps a single record result of Cypher query.
+ * Wraps a single value of `row` JSON attribute of Cypher query result.
  */
 class QueryRecord(obj: JsObject) {
 

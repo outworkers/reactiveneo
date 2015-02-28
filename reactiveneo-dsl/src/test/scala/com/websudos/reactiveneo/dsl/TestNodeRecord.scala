@@ -25,7 +25,7 @@ class TestNode extends Node[TestNode, TestNodeRecord] {
   object name extends StringAttribute(this)
 
   override def fromQuery(data: QueryRecord): TestNodeRecord = {
-    TestNodeRecord(name(data))
+    TestNodeRecord(name(data).getOrElse(""))
   }
 }
 
