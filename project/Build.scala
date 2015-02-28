@@ -26,11 +26,11 @@ object reactiveneo extends Build {
   val scalaFullVersion = scalaMajorVersion + "." + scalaMinorVersion
 
   val UtilVersion = "0.5.0"
-  val ScalatestVersion = "2.2.1"
   val FinagleVersion = "6.24.0"
   val playVersion = "2.3.7"
+  val ScalatestVersion = "2.2.1"
   val ScalazVersion = "7.1.0"
-  val Neo4jVersion = "2.1.6"
+  val Neo4jVersion = "2.1.7"
 
   val publishUrl = "http://maven.websudos.co.uk"
 
@@ -137,8 +137,7 @@ object reactiveneo extends Build {
     name := "ReactiveNeo"
   ).aggregate(
     reactiveneoDsl,
-    reactiveneoTesting,
-    reactiveneoZookeeper
+    reactiveneoTesting
   )
 
   lazy val reactiveneoDsl = Project(
@@ -162,36 +161,24 @@ object reactiveneo extends Build {
     reactiveneoTesting % "test, provided"
   )
 
-  lazy val reactiveneoZookeeper = Project(
-    id = "reactiveneo-zookeeper",
-    base = file("reactiveneo-zookeeper"),
-    settings = Defaults.coreDefaultSettings ++ sharedSettings
-  ).settings(
-    name := "reactiveneo-zookeeper",
-    libraryDependencies ++= Seq(
-      "com.twitter"                  %% "finagle-serversets"                % FinagleVersion,
-      "com.twitter"                  %% "finagle-zookeeper"                 % FinagleVersion
-    )
-  )
-
   lazy val reactiveneoTesting = Project(
     id = "reactiveneo-testing",
     base = file("reactiveneo-testing"),
-    settings = Defaults.coreDefaultSettings ++ sharedSettings
+    settings = Defaults.coreDefaultSettings
   ).settings(
     name := "reactiveneo-testing",
+    scalaVersion := "2.10.4", //neo4j cypher in the embedded server is using Scala 2.10.x
     libraryDependencies ++= Seq(
       "com.twitter"                      %% "util-core"                % "6.23.0",
       "com.twitter"                      %% "finagle-http"             % FinagleVersion,
-      "com.websudos"                     %% "util-testing"             % UtilVersion,
       "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
-      "org.scalacheck"                   %% "scalacheck"               % "1.11.3",
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
       "org.neo4j"                        %  "neo4j-cypher"             % Neo4jVersion % "compile",
       "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile"
         classifier "tests"
-    )
-  ).dependsOn(
-    reactiveneoZookeeper
+    ),
+    fork in Test := true,
+    javaOptions in Test ++= Seq("-Xmx2G")
   )
+
 }

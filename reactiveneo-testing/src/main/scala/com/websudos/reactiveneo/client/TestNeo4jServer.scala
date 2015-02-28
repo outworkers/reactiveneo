@@ -38,11 +38,13 @@ trait TestNeo4jServer extends Suite {
 
   var server: ServerMock = _
 
+  lazy val port: Int = server.port
+
   override protected def withFixture(test: NoArgTest) = {
     db = new TestGraphDatabaseFactory().newImpermanentDatabase()
-    val engine =  new ExecutionEngine( db )
+    val engine = new ExecutionEngine(db)
 
-    server = new ServerMock (req => {
+    server = new ServerMock(req => {
       val query = req.getContent.toString(Charset.defaultCharset())
       val tx = db.beginTx()
       val result = engine.execute(query)
@@ -53,4 +55,5 @@ trait TestNeo4jServer extends Suite {
     })
     try super.withFixture(test) finally db.shutdown()
   }
+
 }

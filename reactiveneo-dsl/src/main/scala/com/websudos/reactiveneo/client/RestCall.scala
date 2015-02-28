@@ -14,11 +14,14 @@
  */
 package com.websudos.reactiveneo.client
 
+import java.util.concurrent.TimeUnit
+
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import com.websudos.reactiveneo.dsl.{ MatchQuery, ReturnExpression }
 import org.jboss.netty.handler.codec.http.HttpMethod
 
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
 /**
  * REST API endpoints definitions.
@@ -66,14 +69,28 @@ object RestCall {
 /**
  * Service that prepares and executes rest call
  */
-trait RestCallService {
+class RestCallService(config: ClientConfiguration) {
 
-  implicit def client: RestClient
+  implicit def client: RestClient = new RestClient(config)
 
-  implicit def makeRequest[RT <: MatchQuery[_, _, _, _, _, RT]](matchQuery: MatchQuery[_, _, _, _, _, RT]): RestCall[RT] = {
+  implicit def makeRequest[RT](matchQuery: MatchQuery[_, _, _, _, _, RT]): RestCall[RT] = {
     val (query, retType) = matchQuery.finalQuery
-    val call = RestCall(SingleTransaction, retType, query)
+    val requestContent = s"""{
+                           |  "statements" : [ {
+                           |    "statement" : "$query"
+                           |  } ]
+                           |}""".stripMargin
+    val call = RestCall(SingleTransaction, retType, requestContent)
     call
+  }
+
+}
+
+object RestCallService {
+
+  def apply(host: String, port: Int): RestCallService = {
+    val config = ClientConfiguration("localhost", 7474, FiniteDuration(10, TimeUnit.SECONDS))
+    new RestCallService(config)
   }
 
 }
