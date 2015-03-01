@@ -17,8 +17,9 @@ package com.websudos.reactiveneo.client
 import java.util.concurrent.TimeUnit
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import com.websudos.reactiveneo.dsl.{ MatchQuery, ReturnExpression }
+import com.websudos.reactiveneo.dsl.MatchQuery
 import org.jboss.netty.handler.codec.http.HttpMethod
+import play.api.libs.json.Reads
 
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
@@ -39,12 +40,12 @@ class RollbackTransaction(transactionId: Int) extends RestEndpoint(s"/db/data/tr
  * Model of a call to Neo4j server.
  * @tparam RT Type of result call response.
  */
-class RestCall[RT](endpoint: RestEndpoint, content: Option[String], returnExpression: ReturnExpression[RT])(implicit client: RestClient)
+class RestCall[RT](endpoint: RestEndpoint, content: Option[String], resultParser: Reads[RT])(implicit client: RestClient)
     extends ServerCall[Seq[RT]]
     with LazyLogging {
 
   implicit lazy val parser = {
-    val parser = new CypherResultParser[RT]()(returnExpression.resultParser)
+    val parser = new CypherResultParser[RT]()(resultParser)
     parser
   }
 
@@ -57,12 +58,12 @@ class RestCall[RT](endpoint: RestEndpoint, content: Option[String], returnExpres
 
 object RestCall {
 
-  def apply[RT](endpoint: RestEndpoint, returnExpression: ReturnExpression[RT], query: String)(implicit client: RestClient) = {
-    new RestCall[RT](endpoint, Some(query), returnExpression)
+  def apply[RT](endpoint: RestEndpoint, resultParser: Reads[RT], query: String)(implicit client: RestClient) = {
+    new RestCall[RT](endpoint, Some(query), resultParser)
   }
 
-  def apply[RT](endpoint: RestEndpoint, returnExpression: ReturnExpression[RT])(implicit client: RestClient) = {
-    new RestCall[RT](endpoint, None, returnExpression)
+  def apply[RT](endpoint: RestEndpoint, resultParser: Reads[RT])(implicit client: RestClient) = {
+    new RestCall[RT](endpoint, None, resultParser)
   }
 }
 
@@ -73,14 +74,24 @@ class RestCallService(config: ClientConfiguration) {
 
   implicit def client: RestClient = new RestClient(config)
 
+  def neoStatement( cypher: String ) =
+    s"""{
+        |  "statements" : [ {
+        |    "statement" : "$cypher"
+        |  } ]
+        |}""".stripMargin
+
   implicit def makeRequest[RT](matchQuery: MatchQuery[_, _, _, _, _, RT]): RestCall[RT] = {
     val (query, retType) = matchQuery.finalQuery
-    val requestContent = s"""{
-                           |  "statements" : [ {
-                           |    "statement" : "$query"
-                           |  } ]
-                           |}""".stripMargin
-    val call = RestCall(SingleTransaction, retType, requestContent)
+    val requestContent = neoStatement(query)
+    val call = RestCall(SingleTransaction, retType.resultParser, requestContent)
+    call
+  }
+
+
+  implicit def makeRequest[RT](cypher: String)(implicit resultParser: Reads[RT]): RestCall[RT] = {
+    val requestContent = neoStatement(cypher)
+    val call = RestCall(SingleTransaction, resultParser, requestContent)
     call
   }
 

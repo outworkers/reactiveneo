@@ -32,8 +32,8 @@ abstract class ReturnExpression[R] {
   def query(context: QueryBuilderContext): BuiltQuery
 
   /**
-   * Builds result parser for this expression. This is not a full parser but [[Reads]] for extracting values from
-   * a single row of data.
+   * Builds result parser for this expression. This is not a full parser but [[play.api.libs.json.Reads]]
+   * for extracting values from a single row of data.
    * @return Returns the result parser.
    */
   def resultParser: Reads[R]
@@ -54,10 +54,8 @@ case class ObjectReturnExpression[GO <: GraphObject[GO, R], R](go: GraphObject[G
   }
 
 
-  override def resultParser: Reads[R] = {
-    __.read[JsObject].map { obj =>
-      go.fromQuery(QueryRecord(obj))
-    }
+  override def resultParser: Reads[R] = __.read[JsObject].map { obj =>
+    go.fromQuery(QueryRecord(obj))
   }
 
 }
