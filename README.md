@@ -144,7 +144,7 @@ scala> val personNodes = (Person() :-: WorkRelationship(_.company := "ABC") :->:
 personNodes: Future[Seq[Person]]
 ```
 
-## Executing arbitrary Cypher
+## An arbitrary Cypher query
 Cypher is a rich language and whenever you need to use it directly escaping the abstraction layer it's still possible
 with ReactiveNeo. Use the same REST connection object with an arbitrary Cypher query.
 ```
