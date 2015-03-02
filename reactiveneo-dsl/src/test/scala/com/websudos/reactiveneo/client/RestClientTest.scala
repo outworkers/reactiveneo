@@ -52,7 +52,11 @@ class RestClientTest
         Future.value(response)
       }
     }
-    ServerBuilder().codec(Http()).bindTo(new InetSocketAddress("localhost", 6666)).name("testserver").build(new Respond)
+    ServerBuilder()
+      .codec(Http())
+      .bindTo(new InetSocketAddress("localhost", 6666))
+      .name("testserver")
+      .build(new Respond)
   }
 
   it should "execute a request" in {
@@ -60,7 +64,8 @@ class RestClientTest
     val result = client.makeRequest("/")
     result.successful { res =>
       res.getStatus.getCode should equal(200)
-      res.getContent.toString(Charset.forName("UTF-8")) should equal("neo")
+      res.getContent.toString(Charset.forName("UTF-8")) should include("http://localhost/db/manage/")
+      res.getContent.toString(Charset.forName("UTF-8")) should not contain "error"
     }
   }
 
