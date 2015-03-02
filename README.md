@@ -85,6 +85,17 @@ class PersonRelation extends Relationship[PersonRelation, Person] {
 # Querying
 <a href="#table-of-contents">Back to top</a>
 
+## Connection
+
+Prerequisite to making Neo4j requests is REST endpoint definition. This is achived using RestConnection class.
+
+```
+scala> implicit val service = RestConnection("localhost", 7474)
+service: RestConnection
+```
+
+## Making requests
+
 In this example all nodes of Person type are returned.
 ```
 scala> val personNodes = Person().returns(case p ~~ _ => p).execute
@@ -131,4 +142,16 @@ Query for a person that has a relationship to another person with given name
 scala> val personNodes = (Person() :-: WorkRelationship(_.company := "ABC") :->: Person(_.name := "John"))
                          .returns(case p1 ~~ _ => p1).execute
 personNodes: Future[Seq[Person]]
+```
+
+## Executing arbitrary Cypher
+Cypher is a rich language and whenever you need to use it directly escaping the abstraction layer it's still possible
+with ReactiveNeo. Use the same REST connection object with an arbitrary Cypher query.
+```
+scala> val query = "MATCH (n:Person) RETURN n"
+query: String
+implicit val parser: Reads[Person] = __.read[JsObject].map(jsobj => Person((jsobj \ "name").as[String], (jsobj \ "age").as[Int]))
+parser: Reads[Int]
+val result = service.makeRequest[Int](query).execute
+result: Future[Seq[Int]]
 ```
