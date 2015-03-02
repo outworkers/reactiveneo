@@ -154,8 +154,8 @@ with ReactiveNeo. Use the same REST connection object with an arbitrary Cypher q
 scala> val query = "MATCH (n:Person) RETURN n"
 query: String
 implicit val parser: Reads[Person] = __.read[JsObject]
-             . map(jsobj => Person((jsobj \ "name").as[String], (jsobj \ "age").as[Int]))
-parser: Reads[Int]
-val result = service.makeRequest[Int](query).execute
-result: Future[Seq[Int]]
+             .map(jsobj => Person((jsobj \ "name").as[String], (jsobj \ "age").as[Int]))
+parser: Reads[Person]
+val result = service.makeRequest[Person](query).execute
+result: Future[Seq[Person]]
 ```
