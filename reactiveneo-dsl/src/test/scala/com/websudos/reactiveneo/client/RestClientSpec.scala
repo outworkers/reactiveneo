@@ -36,7 +36,7 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
 
     scenario("send a simple MATCH query") {
       Given("started Neo4j server")
-      implicit val service = RestCallService("localhost", 7474)
+      implicit val service = RestConnection("localhost", 7474)
       val query: MatchQuery[_, _, _, _, _, TestNodeRecord] = TestNode().returns { case go ~~ _ => go }
 
       When("REST call is executed")
@@ -51,7 +51,7 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
 
     scenario("send a custom query and use a naive parser") {
       Given("started Neo4j server")
-      val service = RestCallService("localhost", 7474)
+      val service = RestConnection("localhost", 7474)
       val query = "MATCH (n:TestNode) RETURN n"
       implicit val parser: Reads[Int] = __.read[JsObject].map(_ => 6)
 

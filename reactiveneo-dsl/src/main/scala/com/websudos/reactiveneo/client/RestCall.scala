@@ -70,7 +70,7 @@ object RestCall {
 /**
  * Service that prepares and executes rest call
  */
-class RestCallService(config: ClientConfiguration) {
+class RestConnection(config: ClientConfiguration) {
 
   implicit def client: RestClient = new RestClient(config)
 
@@ -97,11 +97,11 @@ class RestCallService(config: ClientConfiguration) {
 
 }
 
-object RestCallService {
+object RestConnection {
 
-  def apply(host: String, port: Int): RestCallService = {
+  def apply(host: String, port: Int): RestConnection = {
     val config = ClientConfiguration("localhost", 7474, FiniteDuration(10, TimeUnit.SECONDS))
-    new RestCallService(config)
+    new RestConnection(config)
   }
 
 }
