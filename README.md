@@ -119,20 +119,23 @@ personNodes: Future[Seq[Person]]
 
 Query for a person that has a relationship to another person
 ```
-scala> val personNodes = (Person() :->: Person()).returns(case p1 ~~ _ => p).execute
+scala> val personNodes = (Person() :->: Person())
+                         .returns(case p1 ~~ _ => p).execute
 personNodes: Future[Seq[Person]]
 ```
 
 Query for a person that has a relationship to another person with given name
 ```
-scala> val personNodes = (Person() :->: Person(_.name := "James")).returns(case p ~~ _ => p).execute
+scala> val personNodes = (Person() :->: Person(_.name := "James"))
+                         .returns(case p ~~ _ => p).execute
 personNodes: Future[Seq[Person]]
 ```
 
 
 Query for a person that has a relationship to another person
 ```
-scala> val personNodes = (Person() :<-: WorkRelationship() :->: Person()).returns(case p1 ~~ r ~~ p2 ~~ _ => p1).execute
+scala> val personNodes = (Person() :<-: WorkRelationship() :->: Person())
+                         .returns(case p1 ~~ r ~~ p2 ~~ _ => p1).execute
 personNodes: Future[Seq[Person]]
 ```
 
@@ -150,7 +153,8 @@ with ReactiveNeo. Use the same REST connection object with an arbitrary Cypher q
 ```
 scala> val query = "MATCH (n:Person) RETURN n"
 query: String
-implicit val parser: Reads[Person] = __.read[JsObject].map(jsobj => Person((jsobj \ "name").as[String], (jsobj \ "age").as[Int]))
+implicit val parser: Reads[Person] = __.read[JsObject]
+             . map(jsobj => Person((jsobj \ "name").as[String], (jsobj \ "age").as[Int]))
 parser: Reads[Int]
 val result = service.makeRequest[Int](query).execute
 result: Future[Seq[Int]]
