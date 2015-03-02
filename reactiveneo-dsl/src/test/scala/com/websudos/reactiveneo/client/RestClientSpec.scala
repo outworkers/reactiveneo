@@ -36,11 +36,11 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
 
     scenario("send a simple MATCH query") {
       Given("started Neo4j server")
-      val service = RestCallService("localhost", 7474)
+      implicit val service = RestCallService("localhost", 7474)
       val query: MatchQuery[_, _, _, _, _, TestNodeRecord] = TestNode().returns { case go ~~ _ => go }
 
       When("REST call is executed")
-      val result = service.makeRequest(query).execute
+      val result = query.execute
 
       Then("The result should be delivered")
       result successful { res =>

@@ -14,9 +14,11 @@
  */
 package com.websudos.reactiveneo.dsl
 
+import com.websudos.reactiveneo.client.RestCallService
 import com.websudos.reactiveneo.query.{BuiltQuery, CypherKeywords, CypherQueryBuilder}
 
 import scala.annotation.implicitNotFound
+import scala.concurrent.Future
 
 sealed trait RelationshipBind
 
@@ -86,6 +88,13 @@ private[reactiveneo] class MatchQuery[P <: Pattern, WB <: WhereBind, RB <: Retur
   final def finalQuery: (String, ReturnExpression[RT]) = {
     (builtQuery.queryString, ret.get)
   }
+
+  /**
+   * Execute the request against provided REST endpoint
+   * @param connection REST endpoint calling service.
+   * @return Asynchronous response
+   */
+  def execute(implicit connection: RestCallService): Future[Seq[RT]] = connection.makeRequest(this).execute
 
 }
 
