@@ -117,10 +117,8 @@ object reactiveneo extends Build {
       "-unchecked"
      ),
     libraryDependencies ++= Seq(
-      "com.chuusai"                  %%  "shapeless"                        % "2.0.0",
       "com.github.nscala-time"       %% "nscala-time"                       % "1.0.0",
       "com.typesafe.scala-logging"   %% "scala-logging-slf4j"               % "2.1.2",
-      "com.websudos"                 %% "util-testing"                      % UtilVersion         % "test",
       "org.scalaz"                   %% "scalaz-scalacheck-binding"         % ScalazVersion       % "test",
       "org.scalatest"                %% "scalatest"                         % ScalatestVersion    % "test, provided",
       "org.scalamock"                %% "scalamock-scalatest-support"       % "3.2.1"             % "test"
@@ -143,9 +141,7 @@ object reactiveneo extends Build {
   lazy val reactiveneoDsl = Project(
     id = "reactiveneo-dsl",
     base = file("reactiveneo-dsl"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings ++
-      publishSettings
+    settings = Defaults.coreDefaultSettings ++ sharedSettings ++ publishSettings
   ).settings(
     name := "reactiveneo-dsl",
     libraryDependencies ++= Seq(
@@ -164,11 +160,11 @@ object reactiveneo extends Build {
   lazy val reactiveneoTesting = Project(
     id = "reactiveneo-testing",
     base = file("reactiveneo-testing"),
-    settings = Defaults.coreDefaultSettings
+    settings = Defaults.coreDefaultSettings ++ sharedSettings ++ publishSettings
   ).settings(
     name := "reactiveneo-testing",
-    scalaVersion := "2.10.4", //neo4j cypher in the embedded server is using Scala 2.10.x
     libraryDependencies ++= Seq(
+      "com.websudos"                     %% "util-testing"             % UtilVersion,
       "com.twitter"                      %% "util-core"                % "6.23.0",
       "com.twitter"                      %% "finagle-http"             % FinagleVersion,
       "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
