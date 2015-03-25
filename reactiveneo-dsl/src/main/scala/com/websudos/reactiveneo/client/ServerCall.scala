@@ -14,50 +14,15 @@
  */
 package com.websudos.reactiveneo.client
 
-import com.websudos.reactiveneo.dsl.ReturnExpression
-import org.jboss.netty.handler.codec.http.HttpMethod
-
 import scala.concurrent.Future
 
 /**
- * REST API endpoints definitions.
- * @param path Server query path.
- * @param method HTTP method, with POST as default.
+ * Abstraction of communication with a server.
+ *
+ * @tparam RT type of server response
  */
-case class RestEndpoint(path: String, method: HttpMethod = HttpMethod.POST)
-object SingleTransaction extends RestEndpoint("/db/data/transaction/commit")
-object BeginTransaction extends RestEndpoint("/db/data/transaction")
-class ContinueInTransaction(transactionId: Int) extends RestEndpoint(s"/db/data/transaction/$transactionId")
-class CommitTransaction(transactionId: Int) extends RestEndpoint(s"/db/data/transaction/$transactionId/commit")
-class RollbackTransaction(transactionId: Int) extends RestEndpoint(s"/db/data/transaction/$transactionId", HttpMethod.DELETE)
+trait ServerCall[RT] {
 
-/**
- * Model of a call to Neo4j server.
- * @tparam RT Type of result call response.
- */
-class ServerCall[RT](endpoint: RestEndpoint, content: Option[String], returnExpression: ReturnExpression[RT])
-(implicit client: RestClient) {
+  def execute(): Future[RT]
 
-  implicit lazy val parser = {
-    val parser = new CypherResultParser[RT]()(returnExpression.resultParser)
-    parser
-  }
-
-
-  def execute: Future[Seq[RT]] = {
-    val result = client.makeRequest[Seq[RT]](endpoint.path, endpoint.method)
-    result
-  }
-
-}
-
-object ServerCall {
-
-  def apply[RT](endpoint: RestEndpoint, returnExpression: ReturnExpression[RT], query: String)(implicit client: RestClient) = {
-    new ServerCall[RT](endpoint, Some(query), returnExpression)
-  }
-
-  def apply[RT](endpoint: RestEndpoint, returnExpression: ReturnExpression[RT])(implicit client: RestClient) = {
-    new ServerCall[RT](endpoint, None, returnExpression)
-  }
 }

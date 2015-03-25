@@ -12,19 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.websudos.reactiveneo.client
+package com.websudos.reactiveneo
 
-import org.scalatest.{ Matchers, FlatSpec }
+import org.scalatest.Tag
 
-class ServerMockTest extends FlatSpec with Matchers with ServerMockSugar {
-
-  it should "return a listening port" in {
-    val server = new ServerMock(_ => "hello")
-    server.port should be > 0
-  }
-
-  it should "return a host name" in {
-    val server = new ServerMock(_ => "hello")
-    server.host shouldEqual "localhost"
-  }
-}
+/**
+ * Tag indicating a running neo4j server is required for a test.
+ */
+object RequiresNeo4jServer extends Tag("Requires started Neo4j server")
