@@ -25,7 +25,6 @@ object reactiveneo extends Build {
   val scalaMinorVersion = "6"
   val scalaFullVersion = scalaMajorVersion + "." + scalaMinorVersion
 
-  val UtilVersion = "0.5.0"
   val FinagleVersion = "6.24.0"
   val playVersion = "2.3.7"
   val ScalatestVersion = "2.2.1"
@@ -164,7 +163,6 @@ object reactiveneo extends Build {
   ).settings(
     name := "reactiveneo-testing",
     libraryDependencies ++= Seq(
-      "com.websudos"                     %% "util-testing"             % UtilVersion,
       "com.twitter"                      %% "util-core"                % "6.23.0",
       "com.twitter"                      %% "finagle-http"             % FinagleVersion,
       "org.scalatest"                    %% "scalatest"                % ScalatestVersion,

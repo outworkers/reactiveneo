@@ -16,28 +16,23 @@ package com.websudos.reactiveneo.client
 
 import com.websudos.reactiveneo.RequiresNeo4jServer
 import com.websudos.reactiveneo.dsl._
-import com.websudos.util.testing._
-import org.scalatest.concurrent.PatienceConfiguration
-import org.scalatest.time.SpanSugar._
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FeatureSpec, GivenWhenThen, Matchers}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 case class InsertResult(id: Int)
 
 case class Person(name: String, age: Int)
 
-class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
+class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers
+    with ScalaFutures with IntegrationPatience {
 
   info("As a user")
   info("I want to be able to make a call to Neo4j server")
   info("So I can get the data")
   info("And expect the the result to be parsed for me")
-
-  implicit val s: PatienceConfiguration.Timeout = timeout(10 seconds)
 
   feature("REST client") {
 
@@ -50,7 +45,7 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
       val result = query.execute
 
       Then("The result should be delivered")
-      result successful { res =>
+      whenReady(result) { res =>
         res should not be empty
       }
 
@@ -68,7 +63,7 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
       val result = service.makeRequest[InsertResult](query).execute
 
       Then("The result should be delivered")
-      result successful { res =>
+      whenReady(result) { res =>
         res should not be empty
         res.head.id shouldBe >(0)
       }
@@ -84,7 +79,7 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
       val result = service.makeRequest[Person](query).execute
 
       Then("The result should be delivered")
-      result successful { res =>
+      whenReady(result) { res =>
         res should not be empty
         res.head.name shouldBe "Mike"
       }
