@@ -20,11 +20,15 @@ import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.SpanSugar._
 import org.scalatest.{ FeatureSpec, GivenWhenThen, Matchers }
 import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
 case class InsertResult(id: Int)
+
+case class Person(name: String, age: Int)
 
 class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
 
@@ -84,9 +88,24 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
       Then("The result should be delivered")
       result successful { res =>
         res should not be empty
-        res.head.id shouldBe > (0)
+        res.head.id shouldBe >(0)
       }
+    }
 
+    scenario("create a Person node and load it") {
+      Given("started Neo4j server")
+      val service = RestConnection("localhost", 7474)
+      val query = "CREATE (p: Person { name: 'Mike', age: 10 }) RETURN p"
+      implicit val parser: Reads[Person] = ((__ \ "name").read[String] and (__ \ "age").read[Int])(Person)
+
+      When("REST call is executed")
+      val result = service.makeRequest[Person](query).execute
+
+      Then("The result should be delivered")
+      result successful { res =>
+        res should not be empty
+        res.head.name shouldBe "Mike"
+      }
     }
 
   }
