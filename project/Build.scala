@@ -22,7 +22,7 @@ import org.scalastyle.sbt.ScalastylePlugin
 object reactiveneo extends Build {
 
   val scalaMajorVersion = "2.11"
-  val scalaMinorVersion = "5"
+  val scalaMinorVersion = "6"
   val scalaFullVersion = scalaMajorVersion + "." + scalaMinorVersion
 
   val UtilVersion = "0.5.0"

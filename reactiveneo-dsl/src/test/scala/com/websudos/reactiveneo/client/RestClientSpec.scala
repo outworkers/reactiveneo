@@ -14,17 +14,17 @@
  */
 package com.websudos.reactiveneo.client
 
+import com.websudos.reactiveneo.RequiresNeo4jServer
 import com.websudos.reactiveneo.dsl._
 import com.websudos.util.testing._
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.SpanSugar._
-import org.scalatest.{ FeatureSpec, GivenWhenThen, Matchers }
-import play.api.libs.json._
-import play.api.libs.json.Reads._
+import org.scalatest.{FeatureSpec, GivenWhenThen, Matchers}
 import play.api.libs.functional.syntax._
+import play.api.libs.json.Reads._
+import play.api.libs.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Random
 
 case class InsertResult(id: Int)
 
@@ -41,7 +41,7 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
 
   feature("REST client") {
 
-    scenario("send a simple MATCH query") {
+    scenario("send a simple MATCH query", RequiresNeo4jServer) {
       Given("started Neo4j server")
       implicit val service = RestConnection("localhost", 7474)
       val query: MatchQuery[_, _, _, _, _, TestNodeRecord] = TestNode().returns { case go ~~ _ => go }
@@ -56,25 +56,7 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
 
     }
 
-    scenario("send a custom query and use a naive parser") {
-      Given("started Neo4j server")
-      val service = RestConnection("localhost", 7474)
-      val query = "MATCH (n:TestNode) RETURN n"
-      val resultMock = Random.nextString(10)
-      implicit val parser: Reads[String] = __.read[JsObject].map(_ => resultMock)
-
-      When("REST call is executed")
-      val result = service.makeRequest[String](query).execute
-
-      Then("The result should be delivered")
-      result successful { res =>
-        res should not be empty
-        res should contain only resultMock
-      }
-
-    }
-
-    scenario("send a query and use a custom parser to get the result") {
+    scenario("send a query and use a custom parser to get the result", RequiresNeo4jServer) {
       Given("started Neo4j server")
       val service = RestConnection("localhost", 7474)
       val query = "CREATE (n) RETURN id(n)"
@@ -92,7 +74,7 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
       }
     }
 
-    scenario("create a Person node and load it") {
+    scenario("create a Person node and load it", RequiresNeo4jServer) {
       Given("started Neo4j server")
       val service = RestConnection("localhost", 7474)
       val query = "CREATE (p: Person { name: 'Mike', age: 10 }) RETURN p"
