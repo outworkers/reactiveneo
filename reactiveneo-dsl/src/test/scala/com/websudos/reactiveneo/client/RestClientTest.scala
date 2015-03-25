@@ -69,17 +69,5 @@ class RestClientTest
     }
   }
 
-  it should "execute a request with a custom parser" in {
-    val client = new RestClient(ClientConfiguration("localhost", 6666, FiniteDuration(10, TimeUnit.SECONDS)))
-    implicit val parser = new ResultParser[String] {
-      override def parseResult(response: HttpResponse): Try[String] = {
-        Try(response.getContent.toString(Charset.forName("UTF-8")))
-      }
-    }
-    val result: scala.concurrent.Future[String] = client.makeRequest("/")
-    result successful { res =>
-      res should equal("neo")
-    }
-  }
 
 }

@@ -22,13 +22,16 @@ import org.scalatest.{ FeatureSpec, GivenWhenThen, Matchers }
 import play.api.libs.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Random
+
+case class InsertResult(id: Int)
 
 class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
 
   info("As a user")
   info("I want to be able to make a call to Neo4j server")
   info("So I can get the data")
-  info("And never worry about REST result parsing")
+  info("And expect the the result to be parsed for me")
 
   implicit val s: PatienceConfiguration.Timeout = timeout(10 seconds)
 
@@ -53,15 +56,35 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers {
       Given("started Neo4j server")
       val service = RestConnection("localhost", 7474)
       val query = "MATCH (n:TestNode) RETURN n"
-      implicit val parser: Reads[Int] = __.read[JsObject].map(_ => 6)
+      val resultMock = Random.nextString(10)
+      implicit val parser: Reads[String] = __.read[JsObject].map(_ => resultMock)
 
       When("REST call is executed")
-      val result = service.makeRequest[Int](query).execute
+      val result = service.makeRequest[String](query).execute
 
       Then("The result should be delivered")
       result successful { res =>
         res should not be empty
-        res should contain only 6
+        res should contain only resultMock
+      }
+
+    }
+
+    scenario("send a query and use a custom parser to get the result") {
+      Given("started Neo4j server")
+      val service = RestConnection("localhost", 7474)
+      val query = "CREATE (n) RETURN id(n)"
+      implicit val parser: Reads[InsertResult] = __.read[Int].map { arr =>
+        InsertResult(arr)
+      }
+
+      When("REST call is executed")
+      val result = service.makeRequest[InsertResult](query).execute
+
+      Then("The result should be delivered")
+      result successful { res =>
+        res should not be empty
+        res.head.id shouldBe > (0)
       }
 
     }
