@@ -16,7 +16,6 @@ package com.websudos.reactiveneo.client
 
 import java.net.InetSocketAddress
 
-import com.websudos.util.testing._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ServerBuilder, Server}
 import com.twitter.finagle.http.Http
@@ -27,6 +26,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponse}
 import org.scalatest.concurrent.PatienceConfiguration
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.SpanSugar._
 
 /**
@@ -34,7 +34,7 @@ import org.scalatest.time.SpanSugar._
  */
 class ServerMock(handler: (HttpRequest) => HttpResponse) {
 
-  implicit val s: PatienceConfiguration.Timeout = timeout(10 seconds)
+  implicit val s: PatienceConfiguration.Timeout = Timeout(10 seconds)
 
   private val address = new InetSocketAddress("localhost", 0)
 
@@ -60,7 +60,7 @@ class ServerMock(handler: (HttpRequest) => HttpResponse) {
 
 trait ServerMockSugar {
 
-  implicit def fromString(contents: String): DefaultHttpResponse = {
+  implicit def stringResponse(contents: String): DefaultHttpResponse = {
     val response = new DefaultHttpResponse(HTTP_1_1, OK)
     response.setContent(copiedBuffer(contents, Utf8))
     response
