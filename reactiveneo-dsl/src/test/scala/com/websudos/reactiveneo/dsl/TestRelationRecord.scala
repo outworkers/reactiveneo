@@ -28,7 +28,7 @@ class TestRelationship extends Relationship[TestRelationship, TestRelationRecord
 
 
   override def fromQuery(data: QueryRecord): TestRelationRecord = {
-    TestRelationRecord(year(data))
+    TestRelationRecord(year(data).getOrElse(0))
   }
 
 }

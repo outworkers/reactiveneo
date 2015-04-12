@@ -31,7 +31,7 @@ abstract class AbstractAttribute[@specialized(Int, Double, Float, Long, Boolean,
    * @param query Query result data.
    * @return Decoded attribute value.
    */
-  def apply(query: QueryRecord): T
+  def apply(query: QueryRecord): Option[T]
 
 }
 
@@ -47,10 +47,21 @@ abstract class Attribute[Owner <: GraphObject[Owner, R], R, T](val owner: GraphO
 class StringAttribute[Owner <: GraphObject[Owner, R], R](graphObject: GraphObject[Owner, R])
   extends Attribute[Owner, R, String](graphObject) {
 
-  override def apply(query: QueryRecord): String = {
-    query[String](name).get
+  override def apply(query: QueryRecord): Option[String] = {
+    query[String](name)
   }
 
+}
+
+/**
+ * Long attribute definition.
+ */
+class LongAttribute[Owner <: GraphObject[Owner, R], R](graphObject: GraphObject[Owner, R])
+  extends Attribute[Owner, R, Long](graphObject) {
+
+  override def apply(query: QueryRecord): Option[Long] = {
+    query[Long](name)
+  }
 
 }
 
@@ -58,8 +69,8 @@ class StringAttribute[Owner <: GraphObject[Owner, R], R](graphObject: GraphObjec
 class IntegerAttribute[Owner <: GraphObject[Owner, R], R](graphObject: GraphObject[Owner, R])
   extends Attribute[Owner, R, Int](graphObject) {
 
-  override def apply(query: QueryRecord): Int = {
-    query[Int](name).get
+  override def apply(query: QueryRecord): Option[Int] = {
+    query[Int](name)
   }
 
 }

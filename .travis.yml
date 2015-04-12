@@ -25,5 +25,5 @@ jdk:
   - oraclejdk7
   - openjdk7
 
-script: "sbt test"
+script: "sbt \"test-only * -- -l RequiresNeo4jServer\""
 
