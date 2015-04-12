@@ -56,6 +56,9 @@ class RestClient(config: ClientConfiguration) extends StrictLogging {
     content.foreach { body =>
       request.setContent(ChannelBuffers.copiedBuffer(body, Charset.forName("UTF-8")))
     }
+    request.headers()
+      .add("Content-Type", "application/json")
+      .add("Host",config.server)
 
     val response: util.Future[HttpResponse] = client(request)
     response onSuccess { resp: HttpResponse =>
