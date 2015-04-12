@@ -14,7 +14,7 @@
  */
 package com.websudos.reactiveneo.dsl
 
-import com.websudos.reactiveneo.client.{ServerCall, SingleTransaction, RestClient}
+import com.websudos.reactiveneo.client.RestConnection
 import com.websudos.reactiveneo.query.{BuiltQuery, CypherKeywords, CypherQueryBuilder}
 
 import scala.annotation.implicitNotFound
@@ -56,53 +56,53 @@ private[reactiveneo] abstract class LimitUnbound extends LimitBind
  * @param builtQuery Current query string.
  * @param context Map of added node types to corresponding alias value used in RETURN clause.
  */
-private[reactiveneo] class MatchQuery[
-  P  <: Pattern,
-  WB <: WhereBind,
-  RB <: ReturnBind,
-  OB <: OrderBind,
-  LB <: LimitBind,
-  RT](pattern: P,
-      builtQuery: BuiltQuery,
-      context: QueryBuilderContext,
-      ret: Option[ReturnExpression[RT]] = None) extends CypherQueryBuilder {
-
+private[reactiveneo] class MatchQuery[P <: Pattern, WB <: WhereBind, RB <: ReturnBind, OB <: OrderBind, LB <: LimitBind, RT](
+    pattern: P,
+    builtQuery: BuiltQuery,
+    context: QueryBuilderContext,
+    ret: Option[ReturnExpression[RT]] = None) extends CypherQueryBuilder {
 
   def query: String = builtQuery.queryString
 
-
   @implicitNotFound("You cannot use two where clauses on a single query")
-  final def where(condition: P => Criteria[_])
-                 (implicit ev: WB =:= WhereUnbound): MatchQuery[P, WhereBound, RB, OB, LB, _] = {
-    new MatchQuery[P, WhereBound, RB, OB, LB, Any] (
+  final def where(
+    condition: P => Criteria[_])(implicit ev: WB =:= WhereUnbound): MatchQuery[P, WhereBound, RB, OB, LB, _] = {
+    new MatchQuery[P, WhereBound, RB, OB, LB, Any](
       pattern,
       where(builtQuery, condition(pattern).clause),
       context)
   }
 
-  final def returns[URT](ret: P => ReturnExpression[URT]): MatchQuery[P, WB, ReturnBound, OB, LB, URT]  = {
-    new MatchQuery[P, WB, ReturnBound, OB, LB, URT] (
+  final def returns[URT](ret: P => ReturnExpression[URT]): MatchQuery[P, WB, ReturnBound, OB, LB, URT] = {
+    new MatchQuery[P, WB, ReturnBound, OB, LB, URT](
       pattern,
       builtQuery.appendSpaced(CypherKeywords.RETURN).appendSpaced(ret(pattern).query(context)),
       context,
       Some(ret(pattern)))
   }
 
+  /**
+   * Generate final query and result type tuple.
+   */
   @implicitNotFound("You need to add return clause to capture the type of result")
-  final def execute(implicit client: RestClient, ev: RB =:= ReturnBound): Future[Seq[RT]] = {
-    val call = ServerCall(SingleTransaction, ret.get, builtQuery.queryString)
-    call.execute
+  final def finalQuery: (String, ReturnExpression[RT]) = {
+    (builtQuery.queryString, ret.get)
   }
+
+  /**
+   * Execute the request against provided REST endpoint
+   * @param connection REST endpoint calling service.
+   * @return Asynchronous response
+   */
+  def execute(implicit connection: RestConnection): Future[Seq[RT]] = connection.makeRequest(this).execute
 
 }
 
 private[reactiveneo] object MatchQuery {
 
-
   def createRootQuery[P <: Pattern](
-                          pattern: P,
-                          context: QueryBuilderContext):
-                            MatchQuery[P, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, _] = {
+    pattern: P,
+    context: QueryBuilderContext): MatchQuery[P, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, _] = {
     pattern.foreach(context.nextLabel(_))
     val query = new BuiltQuery(CypherKeywords.MATCH).appendSpaced(pattern.queryClause(context))
     new MatchQuery[P, WhereUnbound, ReturnUnbound, OrderUnbound, LimitUnbound, Any](
