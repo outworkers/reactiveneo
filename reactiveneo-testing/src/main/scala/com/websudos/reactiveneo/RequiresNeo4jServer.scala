@@ -19,4 +19,4 @@ import org.scalatest.Tag
 /**
  * Tag indicating a running neo4j server is required for a test.
  */
-object RequiresNeo4jServer extends Tag("Requires started Neo4j server")
+object RequiresNeo4jServer extends Tag("RequiresNeo4jServer")

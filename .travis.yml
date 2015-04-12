@@ -25,5 +25,5 @@ jdk:
   - oraclejdk7
   - openjdk7
 
-script: "sbt \"test-only -- -l com.websudos.reactiveneo.RequiresNeo4jServer\""
+script: "sbt \"test-only * -- -l RequiresNeo4jServer\""
 

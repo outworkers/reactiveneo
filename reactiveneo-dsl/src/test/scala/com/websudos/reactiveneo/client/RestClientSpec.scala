@@ -51,11 +51,11 @@ class RestClientSpec extends FeatureSpec with GivenWhenThen with Matchers
 
     }
 
-    scenario("send a query and use a custom parser to get the result", RequiresNeo4jServer) {
+      scenario("send a query and use a custom parser to get the result", RequiresNeo4jServer) {
       Given("started Neo4j server")
       val service = RestConnection("localhost", 7474)
       val query = "CREATE (n) RETURN id(n)"
-      implicit val parser: Reads[InsertResult] = __.read[Int].map { arr =>
+      implicit val parsRester: Reads[InsertResult] = __.read[Int].map { arr =>
         InsertResult(arr)
       }
 

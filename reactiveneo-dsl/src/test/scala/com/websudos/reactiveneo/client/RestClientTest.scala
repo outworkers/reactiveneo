@@ -14,42 +14,17 @@
  */
 package com.websudos.reactiveneo.client
 
-import java.net.InetSocketAddress
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
-import com.twitter.finagle.Service
-import com.twitter.finagle.builder.{Server, ServerBuilder}
-import com.twitter.finagle.http.Http
-import com.twitter.io.Charsets.Utf8
-import com.twitter.util.Future
 import com.websudos.reactiveneo.RequiresNeo4jServer
 import com.websudos.reactiveneo.client.RestClient._
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import org.jboss.netty.handler.codec.http.HttpResponseStatus._
-import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
-import org.jboss.netty.handler.codec.http._
 import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 
 import scala.concurrent.duration.FiniteDuration
 
-class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter with ScalaFutures with IntegrationPatience {
-
-  def startServer: Server = {
-    class Respond extends Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = {
-        val response = new DefaultHttpResponse(HTTP_1_1, OK)
-        response.setContent(copiedBuffer("neo", Utf8))
-        Future.value(response)
-      }
-    }
-    ServerBuilder()
-      .codec(Http())
-      .bindTo(new InetSocketAddress("localhost", 6666))
-      .name("testserver")
-      .build(new Respond)
-  }
+class RestClientTest extends FlatSpec with Matchers with ScalaFutures with IntegrationPatience {
 
   it should "execute a request" taggedAs RequiresNeo4jServer in {
     val client = new RestClient(ClientConfiguration("localhost", 7474, FiniteDuration(10, TimeUnit.SECONDS)))
