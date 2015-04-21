@@ -21,11 +21,15 @@ import org.scalastyle.sbt.ScalastylePlugin
 
 object reactiveneo extends Build {
 
-  val UtilVersion = "0.4.0"
-  val ScalatestVersion = "2.2.0-M1"
-  val FinagleVersion = "6.20.0"
-  val playVersion = "2.3.4"
+  val scalaMajorVersion = "2.11"
+  val scalaMinorVersion = "6"
+  val scalaFullVersion = scalaMajorVersion + "." + scalaMinorVersion
+
+  val FinagleVersion = "6.24.0"
+  val playVersion = "2.3.7"
+  val ScalatestVersion = "2.2.1"
   val ScalazVersion = "7.1.0"
+  val Neo4jVersion = "2.1.7"
 
   val publishUrl = "http://maven.websudos.co.uk"
 
@@ -57,7 +61,7 @@ object reactiveneo extends Build {
         </scm>
         <developers>
           <developer>
-            <id>benjumanji</id>
+            <id>bjankie1</id>
             <name>Bartosz Jankiewicz</name>
             <url>http://github.com/bjankie1</url>
           </developer>
@@ -86,7 +90,7 @@ object reactiveneo extends Build {
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
     organization := "com.websudos",
     version := "0.1.2",
-    scalaVersion := "2.10.4",
+    scalaVersion := scalaFullVersion,
     resolvers ++= Seq(
       "Typesafe repository snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
       "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/",
@@ -112,13 +116,11 @@ object reactiveneo extends Build {
       "-unchecked"
      ),
     libraryDependencies ++= Seq(
-      "com.chuusai"                  %  "shapeless_2.10.4"                  % "2.0.0",
       "com.github.nscala-time"       %% "nscala-time"                       % "1.0.0",
       "com.typesafe.scala-logging"   %% "scala-logging-slf4j"               % "2.1.2",
-      "com.websudos"                 %% "util-testing"                      % UtilVersion   % "test",
       "org.scalaz"                   %% "scalaz-scalacheck-binding"         % ScalazVersion       % "test",
       "org.scalatest"                %% "scalatest"                         % ScalatestVersion    % "test, provided",
-      "org.scalamock"                %% "scalamock-scalatest-support"       % "3.0.1"             % "test"
+      "org.scalamock"                %% "scalamock-scalatest-support"       % "3.2.1"             % "test"
     ),
     fork in Test := true,
     javaOptions in Test ++= Seq("-Xmx2G")
@@ -132,60 +134,45 @@ object reactiveneo extends Build {
     name := "ReactiveNeo"
   ).aggregate(
     reactiveneoDsl,
-    reactiveneoTesting,
-    reactiveneoZookeeper
+    reactiveneoTesting
   )
 
   lazy val reactiveneoDsl = Project(
     id = "reactiveneo-dsl",
     base = file("reactiveneo-dsl"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings ++
-      publishSettings
+    settings = Defaults.coreDefaultSettings ++ sharedSettings ++ publishSettings
   ).settings(
     name := "reactiveneo-dsl",
     libraryDependencies ++= Seq(
-      "com.chuusai"                  % "shapeless_2.10.4"                   % "2.0.0",
-      "org.scala-lang"               %  "scala-reflect"                     % "2.10.4",
+      "org.scala-lang"               %  "scala-reflect"                     % scalaFullVersion,
       "com.twitter"                  %% "finagle-http"                      % FinagleVersion,
-      "com.twitter"                  %% "util-core"                         % FinagleVersion,
+      "com.twitter"                  %% "util-core"                         % "6.23.0",
       "joda-time"                    %  "joda-time"                         % "2.3",
       "org.joda"                     %  "joda-convert"                      % "1.6",
       "com.typesafe.play"            %% "play-json"                         % playVersion,
-      "net.liftweb"                  %% "lift-json"                         % "2.6-M4"                  % "test, provided"
+      "org.neo4j"                    % "neo4j-cypher"                       % Neo4jVersion
     )
   ).dependsOn(
     reactiveneoTesting % "test, provided"
   )
 
-  lazy val reactiveneoZookeeper = Project(
-    id = "reactiveneo-zookeeper",
-    base = file("reactiveneo-zookeeper"),
-    settings = Defaults.coreDefaultSettings ++ sharedSettings
-  ).settings(
-    name := "reactiveneo-zookeeper",
-    libraryDependencies ++= Seq(
-      "com.twitter"                  %% "finagle-serversets"                % FinagleVersion,
-      "com.twitter"                  %% "finagle-zookeeper"                 % FinagleVersion
-    )
-  )
-
   lazy val reactiveneoTesting = Project(
     id = "reactiveneo-testing",
     base = file("reactiveneo-testing"),
-    settings = Defaults.coreDefaultSettings ++ sharedSettings
+    settings = Defaults.coreDefaultSettings ++ sharedSettings ++ publishSettings
   ).settings(
     name := "reactiveneo-testing",
     libraryDependencies ++= Seq(
-      "com.twitter"                      %% "util-core"                % FinagleVersion,
-      "com.websudos"                     %% "util-testing"             % UtilVersion,
-      "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
-      "org.scalacheck"                   %% "scalacheck"               % "1.11.3",
-      "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
+      "com.twitter"                      %% "util-core"                % "6.23.0",
       "com.twitter"                      %% "finagle-http"             % FinagleVersion,
-      "com.twitter"                      %% "util-core"                % FinagleVersion
-    )
-  ).dependsOn(
-    reactiveneoZookeeper
+      "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
+      "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
+      "org.neo4j"                        %  "neo4j-cypher"             % Neo4jVersion % "compile",
+      "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile",
+      "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile" classifier "tests"
+    ),
+    fork in Test := true,
+    javaOptions in Test ++= Seq("-Xmx2G")
   )
+
 }

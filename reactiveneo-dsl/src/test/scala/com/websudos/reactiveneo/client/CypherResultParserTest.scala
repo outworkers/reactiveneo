@@ -14,6 +14,7 @@
  */
 package com.websudos.reactiveneo.client
 
+import com.websudos.reactiveneo.dsl.{TestNodeRecord, TestNode, ObjectReturnExpression}
 import org.scalatest.{Matchers, FlatSpec}
 import play.api.libs.json.Reads._
 import play.api.libs.json._
@@ -45,6 +46,14 @@ class CypherResultParserTest extends FlatSpec with Matchers {
     result shouldEqual Seq("test1", "test2")
   }
 
+  it should "parse zero attribute node" in {
+    val expression = ObjectReturnExpression(TestNode)
+    val parser = new CypherResultParser[TestNodeRecord]()(expression.resultParser)
+    val json = """{"results":[{"columns":["n"],"data":[{"row":[{}]},{"row":[{}]},{"row":[{}]}]}],"errors":[]}"""
+    val js = Json.parse(json)
+    val result = parser.parseResult(js)
+    result should have size 3
+  }
 
 
   it should "parse error result" in {
