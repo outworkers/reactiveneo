@@ -14,75 +14,27 @@
  */
 package com.websudos.reactiveneo.client
 
-import java.net.InetSocketAddress
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
-import com.websudos.util.testing._
-import com.twitter.finagle.Service
-import com.twitter.finagle.builder.{Server, ServerBuilder}
-import com.twitter.finagle.http.Http
-import com.twitter.io.Charsets.Utf8
-import com.twitter.util.Future
+import com.websudos.reactiveneo.RequiresNeo4jServer
 import com.websudos.reactiveneo.client.RestClient._
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import org.jboss.netty.handler.codec.http.HttpResponseStatus._
-import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
-import org.jboss.netty.handler.codec.http._
 import org.scalatest._
-import org.scalatest.concurrent.PatienceConfiguration
-import org.scalatest.time.SpanSugar._
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 
 import scala.concurrent.duration.FiniteDuration
-import scala.util.Try
-import scala.concurrent.ExecutionContext.Implicits.global
 
-class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
+class RestClientTest extends FlatSpec with Matchers with ScalaFutures with IntegrationPatience {
 
-  implicit val s: PatienceConfiguration.Timeout = timeout(10 seconds)
-
-  var server: Server = _
-
-  def startServer: Server = {
-    class Respond extends Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = {
-        val response = new DefaultHttpResponse(HTTP_1_1, OK)
-        response.setContent(copiedBuffer("neo", Utf8))
-        Future.value(response)
-      }
+  it should "execute a request" taggedAs RequiresNeo4jServer in {
+    val client = new RestClient(ClientConfiguration("localhost", 7474, FiniteDuration(10, TimeUnit.SECONDS)))
+    val result = client.makeRequest("/")
+    whenReady(result) { res =>
+      res.getStatus.getCode should equal(200)
+      res.getContent.toString(Charset.forName("UTF-8")) should include("http://localhost/db/manage/")
+      res.getContent.toString(Charset.forName("UTF-8")) should not contain "error"
     }
-    ServerBuilder().codec(Http()).bindTo(new InetSocketAddress("localhost", 6666)).name("testserver").build(new Respond)
   }
 
-  before {
-    server = startServer
-  }
-
-  it should "execute a request" in {
-      val client = new RestClient(ClientConfiguration("localhost", 6666, FiniteDuration(10, TimeUnit.SECONDS)))
-      val result = client.makeRequest("/")
-      result.successful { res =>
-        res.getStatus.getCode should equal(200)
-        res.getContent.toString(Charset.forName("UTF-8")) should equal("neo")
-      }
-    }
-
-
-  it should "execute a request with a custom parser" in {
-      val client = new RestClient(ClientConfiguration("localhost", 6666, FiniteDuration(10, TimeUnit.SECONDS)))
-      implicit val parser = new ResultParser[String] {
-        override def parseResult(response: HttpResponse): Try[String] = {
-          Try(response.getContent.toString(Charset.forName("UTF-8")))
-        }
-      }
-      val result: scala.concurrent.Future[String] = client.makeRequest("/")
-      result successful { res =>
-        res should equal("neo")
-      }
-  }
-
-  after {
-    server.close()
-  }
 
 }
