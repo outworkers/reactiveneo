@@ -168,8 +168,8 @@ object reactiveneo extends Build {
       "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
       "org.neo4j"                        %  "neo4j-cypher"             % Neo4jVersion % "compile",
-      "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile"
-        classifier "tests"
+      "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile",
+      "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile" classifier "tests"
     ),
     fork in Test := true,
     javaOptions in Test ++= Seq("-Xmx2G")
