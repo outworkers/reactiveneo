@@ -120,16 +120,13 @@ object ReactiveNeoBuild extends Build {
     name := "ReactiveNeo"
   ).aggregate(
     reactiveneoDsl,
-    reactiveneoTesting,
-    reactiveneoZookeeper
+    reactiveneoTesting
   )
 
   lazy val reactiveneoDsl = Project(
     id = "reactiveneo-dsl",
     base = file("reactiveneo-dsl"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings ++
-      publishSettings
+    settings = Defaults.coreDefaultSettings ++ sharedSettings ++ publishSettings
   ).settings(
     name := "reactiveneo-dsl",
     libraryDependencies ++= Seq(
@@ -146,34 +143,23 @@ object ReactiveNeoBuild extends Build {
     reactiveneoTesting % "test, provided"
   )
 
-  lazy val reactiveneoZookeeper = Project(
-    id = "reactiveneo-zookeeper",
-    base = file("reactiveneo-zookeeper"),
-    settings = Defaults.coreDefaultSettings ++ sharedSettings
-  ).settings(
-    name := "reactiveneo-zookeeper",
-    libraryDependencies ++= Seq(
-      "com.twitter"                  %% "finagle-serversets"                % FinagleVersion,
-      "com.twitter"                  %% "finagle-zookeeper"                 % FinagleZookeeperVersion
-    )
-  )
-
   lazy val reactiveneoTesting = Project(
     id = "reactiveneo-testing",
     base = file("reactiveneo-testing"),
-    settings = Defaults.coreDefaultSettings ++ sharedSettings
+    settings = Defaults.coreDefaultSettings ++ sharedSettings ++ publishSettings
   ).settings(
     name := "reactiveneo-testing",
     libraryDependencies ++= Seq(
-      "com.twitter"                      %% "util-core"                % TwitterUtilVersion,
-      "com.websudos"                     %% "util-testing"             % UtilVersion,
+      "com.twitter"                      %% "util-core"                % "6.23.0",
       "com.twitter"                      %% "finagle-http"             % FinagleVersion,
       "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
+      "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
       "org.neo4j"                        %  "neo4j-cypher"             % Neo4jVersion % "compile",
       "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile",
       "org.neo4j"                        %  "neo4j-kernel"             % Neo4jVersion % "compile" classifier "tests"
-    )
-  ).dependsOn(
-    reactiveneoZookeeper
+    ),
+    fork in Test := true,
+    javaOptions in Test ++= Seq("-Xmx2G")
   )
+
 }
