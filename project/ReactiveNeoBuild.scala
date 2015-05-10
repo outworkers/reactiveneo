@@ -25,6 +25,8 @@ object ReactiveNeoBuild extends Build {
   val ScalatestVersion = "2.2.4"
   val ShapelessVersion = "2.2.0-RC4"
   val FinagleVersion = "6.25.0"
+  val TwitterUtilVersion = "6.24.0"
+  val FinagleZookeeperVersion = "6.24.0"
   val playVersion = "2.3.4"
   val ScalazVersion = "7.1.0"
 
@@ -130,10 +132,10 @@ object ReactiveNeoBuild extends Build {
   ).settings(
     name := "reactiveneo-dsl",
     libraryDependencies ++= Seq(
-      "com.chuusai"                  % "shapeless_2.10.4"                   % "2.0.0",
+      "com.chuusai"                  %% "shapeless"                         % ShapelessVersion,
       "org.scala-lang"               %  "scala-reflect"                     % "2.10.4",
       "com.twitter"                  %% "finagle-http"                      % FinagleVersion,
-      "com.twitter"                  %% "util-core"                         % FinagleVersion,
+      "com.twitter"                  %% "util-core"                         % TwitterUtilVersion,
       "joda-time"                    %  "joda-time"                         % "2.3",
       "org.joda"                     %  "joda-convert"                      % "1.6",
       "com.typesafe.play"            %% "play-json"                         % playVersion,
@@ -151,7 +153,7 @@ object ReactiveNeoBuild extends Build {
     name := "reactiveneo-zookeeper",
     libraryDependencies ++= Seq(
       "com.twitter"                  %% "finagle-serversets"                % FinagleVersion,
-      "com.twitter"                  %% "finagle-zookeeper"                 % FinagleVersion
+      "com.twitter"                  %% "finagle-zookeeper"                 % FinagleZookeeperVersion
     )
   )
 
@@ -162,13 +164,12 @@ object ReactiveNeoBuild extends Build {
   ).settings(
     name := "reactiveneo-testing",
     libraryDependencies ++= Seq(
-      "com.twitter"                      %% "util-core"                % FinagleVersion,
+      "com.twitter"                      %% "util-core"                % TwitterUtilVersion,
       "com.websudos"                     %% "util-testing"             % UtilVersion,
       "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
       "org.scalacheck"                   %% "scalacheck"               % "1.11.3",
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
-      "com.twitter"                      %% "finagle-http"             % FinagleVersion,
-      "com.twitter"                      %% "util-core"                % FinagleVersion
+      "com.twitter"                      %% "finagle-http"             % FinagleVersion
     )
   ).dependsOn(
     reactiveneoZookeeper

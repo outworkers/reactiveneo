@@ -15,12 +15,15 @@
 package com.websudos.reactiveneo.client
 
 import com.websudos.reactiveneo.dsl.{ObjectReturnExpression, TestNode, TestNodeRecord}
+import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.{Matchers, FlatSpec}
 import com.websudos.util.testing._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ServerCallTest extends FlatSpec with Matchers with ServerMockSugar {
+
+  implicit val patienceConfig: PatienceConfiguration.Timeout = timeout(5 seconds)
 
   it should "execute call and parse result" in {
     val testNode = new TestNode
