@@ -14,17 +14,16 @@
  */
 package com.websudos.reactiveneo.client
 
+import com.websudos.reactiveneo.RequiresNeo4jServer
 import com.websudos.reactiveneo.dsl.{ObjectReturnExpression, TestNode, TestNodeRecord}
-import org.scalatest.concurrent.PatienceConfiguration
-import org.scalatest.{Matchers, FlatSpec}
-import com.websudos.util.testing._
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.{FlatSpec, Matchers}
 
-class ServerCallTest extends FlatSpec with Matchers with ServerMockSugar {
+import scala.concurrent.duration._
+
+class RestCallTest extends FlatSpec with Matchers with ServerMockSugar with ScalaFutures with IntegrationPatience {
 
   implicit val patienceConfig: PatienceConfiguration.Timeout = timeout(5 seconds)
-
   it should "execute call and parse result" in {
     val testNode = new TestNode
     val retEx = new ObjectReturnExpression[TestNode, TestNodeRecord](testNode)
@@ -43,9 +42,9 @@ class ServerCallTest extends FlatSpec with Matchers with ServerMockSugar {
         val configuration = ClientConfiguration(addr.getHostName, addr.getPort, 1 second)
         implicit val client = new RestClient(configuration)
 
-        val call = ServerCall(SingleTransaction, retEx, "match (tn: TestNode) return tn")
+        val call = RestCall(SingleTransaction, retEx.resultParser, "match (tn: TestNode) return tn")
         val result = call.execute
-        result successful { res =>
+        whenReady(result) { res =>
           res should have length 1
           res.head.name shouldEqual "Test name"
         }

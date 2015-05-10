@@ -29,6 +29,7 @@ object ReactiveNeoBuild extends Build {
   val FinagleZookeeperVersion = "6.24.0"
   val playVersion = "2.3.4"
   val ScalazVersion = "7.1.0"
+  val Neo4jVersion = "2.1.7"
 
   val publishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
@@ -102,10 +103,9 @@ object ReactiveNeoBuild extends Build {
       "com.chuusai"                  %% "shapeless"                         % ShapelessVersion,
       "com.github.nscala-time"       %% "nscala-time"                       % "1.0.0",
       "com.typesafe.scala-logging"   %% "scala-logging-slf4j"               % "2.1.2",
-      "com.websudos"                 %% "util-testing"                      % UtilVersion   % "test",
       "org.scalaz"                   %% "scalaz-scalacheck-binding"         % ScalazVersion       % "test",
       "org.scalatest"                %% "scalatest"                         % ScalatestVersion    % "test, provided",
-      "org.scalamock"                %% "scalamock-scalatest-support"       % "3.0.1"             % "test"
+      "org.scalamock"                %% "scalamock-scalatest-support"       % "3.2.1"             % "test"
     ),
     fork in Test := true,
     javaOptions in Test ++= Seq("-Xmx2G")
