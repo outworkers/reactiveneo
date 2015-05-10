@@ -1,4 +1,4 @@
-# reactiveneo [![Build Status](https://travis-ci.org/websudos/reactiveneo.svg?branch=develop)](https://travis-ci.org/websudos/reactiveneo)
+# reactiveneo [![Build Status](https://travis-ci.org/websudos/reactiveneo.svg?branch=develop)](https://travis-ci.org/websudos/reactiveneo) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.websudos/reactiveneo_2.10/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.websudos/reactiveneo_2.10)
 
 Reactive type-safe Scala DSL for Neo4j
 
