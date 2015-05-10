@@ -75,6 +75,7 @@ object ReactiveNeoBuild extends Build {
     organization := "com.websudos",
     version := "0.2.0",
     scalaVersion := "2.10.5",
+    crossScalaVersions := Seq("2.10.5", "2.11.6"),
     resolvers ++= Seq(
       "Typesafe repository snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
       "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/",
