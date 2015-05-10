@@ -19,17 +19,16 @@ import sbt._
 import scoverage.ScoverageSbtPlugin.instrumentSettings
 import org.scalastyle.sbt.ScalastylePlugin
 
-object reactiveneo extends Build {
+object ReactiveNeoBuild extends Build {
 
-  val UtilVersion = "0.4.0"
-  val ScalatestVersion = "2.2.0-M1"
-  val FinagleVersion = "6.20.0"
+  val UtilVersion = "0.8.0"
+  val ScalatestVersion = "2.2.4"
+  val ShapelessVersion = "2.2.0-RC4"
+  val FinagleVersion = "6.25.0"
   val playVersion = "2.3.4"
   val ScalazVersion = "7.1.0"
 
-  val publishUrl = "http://maven.websudos.co.uk"
-
-  val mavenPublishSettings : Seq[Def.Setting[_]] = Seq(
+  val publishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
     publishTo <<= version.apply {
@@ -43,7 +42,7 @@ object reactiveneo extends Build {
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
     pomExtra :=
-      <url>https://github.com/websudosuk/reactiveneo</url>
+      <url>https://github.com/websudos/reactiveneo</url>
         <licenses>
           <license>
             <name>Apache License, Version 2.0</name>
@@ -52,12 +51,12 @@ object reactiveneo extends Build {
           </license>
         </licenses>
         <scm>
-          <url>git@github.com:websudosuk/reactiveneo.git</url>
-          <connection>scm:git:git@github.com:websudosuk/reactiveneo.git</connection>
+          <url>git@github.com:websudos/reactiveneo.git</url>
+          <connection>scm:git:git@github.com:websudos/reactiveneo.git</connection>
         </scm>
         <developers>
           <developer>
-            <id>benjumanji</id>
+            <id>bjankie1</id>
             <name>Bartosz Jankiewicz</name>
             <url>http://github.com/bjankie1</url>
           </developer>
@@ -69,24 +68,10 @@ object reactiveneo extends Build {
         </developers>
   )
 
-  val publishSettings : Seq[Def.Setting[_]] = Seq(
-    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    publishTo <<= version { (v: String) => {
-        if (v.trim.endsWith("SNAPSHOT"))
-          Some("snapshots" at publishUrl + "/ext-snapshot-local")
-        else
-          Some("releases"  at publishUrl + "/ext-release-local")
-      }
-    },
-    publishMavenStyle := true,
-    publishArtifact in Test := false,
-    pomIncludeRepository := { _ => true }
-  )
-
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
     organization := "com.websudos",
-    version := "0.1.2",
-    scalaVersion := "2.10.4",
+    version := "0.2.0",
+    scalaVersion := "2.10.5",
     resolvers ++= Seq(
       "Typesafe repository snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
       "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/",
@@ -112,7 +97,7 @@ object reactiveneo extends Build {
       "-unchecked"
      ),
     libraryDependencies ++= Seq(
-      "com.chuusai"                  %  "shapeless_2.10.4"                  % "2.0.0",
+      "com.chuusai"                  %% "shapeless"                         % ShapelessVersion,
       "com.github.nscala-time"       %% "nscala-time"                       % "1.0.0",
       "com.typesafe.scala-logging"   %% "scala-logging-slf4j"               % "2.1.2",
       "com.websudos"                 %% "util-testing"                      % UtilVersion   % "test",
