@@ -3,7 +3,8 @@
 language: scala
 
 scala:
- - "2.10.4"
+ - "2.10.5"
+ - "2.11.6"
 
 # Emails to notify
 notifications:
@@ -24,6 +25,8 @@ branches:
 jdk:
   - oraclejdk7
   - openjdk7
+
+before_script: travis_retry sbt ++$TRAVIS_SCALA_VERSION update
 
 script: "sbt \"test-only * -- -l RequiresNeo4jServer\""
 
