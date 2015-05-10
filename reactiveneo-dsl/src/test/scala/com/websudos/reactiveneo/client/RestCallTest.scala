@@ -15,7 +15,7 @@
 package com.websudos.reactiveneo.client
 
 import com.websudos.reactiveneo.dsl.{ObjectReturnExpression, TestNode, TestNodeRecord}
-import org.scalatest.concurrent.{IntegrationPatience, PatienceConfiguration, ScalaFutures}
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.duration._
