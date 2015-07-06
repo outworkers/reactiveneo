@@ -32,7 +32,7 @@ RETURN r
 
 # Getting it
 
-```
+```scala
 libraryDependencies ++= Seq(
   "com.websudos" %% "reactiveneo-dsl" % "0.3.0",
   "com.websudos" %% "reactiveneo-testing" % "0.3.0"
