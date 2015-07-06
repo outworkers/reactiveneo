@@ -6,6 +6,7 @@ Reactive type-safe Scala DSL for Neo4j
 # Table of contents
 
 <ol>
+  <li><a href="#getting-it">Getting it</a></li>
   <li><a href="#graph-modelling">Graph modelling</a></li>
   <li><a href="#nodes">Nodes</a></li>
   <li><a href="#relationships">Relationships</a></li>
@@ -28,6 +29,15 @@ RETURN r
 ```
 
 
+
+# Getting it
+
+```
+libraryDependencies ++= Seq(
+  "com.websudos" %% "reactiveneo-dsl" % "0.3.0",
+  "com.websudos" %% "reactiveneo-testing" % "0.3.0"
+)
+```
 
 # Graph modelling
 <a href="#table-of-contents">Back to top</a>
