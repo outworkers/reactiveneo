@@ -100,7 +100,7 @@ class RestConnection(config: ClientConfiguration) {
 object RestConnection {
 
   def apply(host: String, port: Int): RestConnection = {
-    val config = ClientConfiguration("localhost", 7474, FiniteDuration(10, TimeUnit.SECONDS))
+    val config = ClientConfiguration(host, port, FiniteDuration(10, TimeUnit.SECONDS))
     new RestConnection(config)
   }
 
