@@ -82,6 +82,8 @@ case class AttributeReturnExpression[GO <: GraphObject[GO, R], R, T](
 
 }
 
+
+
 /**
  * Implicits converting [[com.websudos.reactiveneo.dsl.GraphObject]] to [[com.websudos.reactiveneo.dsl.ObjectReturnExpression]]
  * and [[com.websudos.reactiveneo.attribute.AbstractAttribute]] to [[com.websudos.reactiveneo.dsl.AttributeReturnExpression]]
