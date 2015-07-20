@@ -12,18 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.scoverage.coveralls.CoverallsPlugin.coverallsSettings
 
 import sbt.Keys._
 import sbt._
-import scoverage.ScoverageSbtPlugin.instrumentSettings
 import org.scalastyle.sbt.ScalastylePlugin
 
-object ReactiveNeoBuild extends Build {
+object Build extends Build {
 
-  val UtilVersion = "0.8.0"
+  val UtilVersion = "0.9.8"
   val ScalatestVersion = "2.2.4"
-  val ShapelessVersion = "2.2.0-RC4"
+  val ShapelessVersion = "2.2.4"
   val FinagleVersion = "6.25.0"
   val TwitterUtilVersion = "6.24.0"
   val FinagleZookeeperVersion = "6.24.0"
@@ -85,8 +83,7 @@ object ReactiveNeoBuild extends Build {
       "Sonatype staging"                 at "http://oss.sonatype.org/content/repositories/staging",
       "Java.net Maven2 Repository"       at "http://download.java.net/maven/2/",
       "Twitter Repository"               at "http://maven.twttr.com",
-      "Websudos releases"                at "http://maven.websudos.co.uk/ext-release-local",
-      "Websudos snapshots"               at "http://maven.websudos.co.uk/ext-snapshot-local"
+      Resolver.bintrayRepo("websudos", "oss-releases")
     ),
     scalacOptions ++= Seq(
       "-language:postfixOps",
@@ -110,14 +107,14 @@ object ReactiveNeoBuild extends Build {
     ),
     fork in Test := true,
     javaOptions in Test ++= Seq("-Xmx2G")
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ instrumentSettings ++ publishSettings ++ ScalastylePlugin.Settings
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ publishSettings ++ ScalastylePlugin.Settings
 
   lazy val reactiveneo = Project(
     id = "reactiveneo",
     base = file("."),
-    settings = Defaults.coreDefaultSettings ++ sharedSettings ++ coverallsSettings
+    settings = Defaults.coreDefaultSettings ++ sharedSettings
   ).settings(
-    name := "ReactiveNeo"
+    name := "reactiveneo"
   ).aggregate(
     reactiveneoDsl,
     reactiveneoTesting
