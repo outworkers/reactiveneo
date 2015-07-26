@@ -12,12 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.websudos.reactiveneo
+package com.websudos.reactiveneo.dsl
 
-package object dsl
-  extends DefaultImports
-  with ReturnImplicits
-  with ImplicitConversions
-  with PredicateOps
-  with Functions
+import com.websudos.reactiveneo.query.BuiltQuery
+import play.api.libs.json.{Reads, _}
 
+
+trait Functions {
+
+  /**
+   * Functions that can be applied in `match` or `return` clauses.
+   */
+  abstract class Function[T] extends ReturnExpression[T]
+
+  object count extends Function[Int] {
+
+    override def query( context: QueryBuilderContext ): BuiltQuery = "count(*)"
+
+    override def resultParser: Reads[Int] = {
+      (__ \ "count(*)").read[Int]
+    }
+  }
+
+}

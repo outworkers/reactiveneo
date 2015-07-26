@@ -45,4 +45,7 @@ class MatchQueryTest extends FlatSpec with Matchers {
       "MATCH (a:TestNode {name:'Tom'}) -> [b:TestRelationship] <- (c:TestNode)   RETURN a "
   }
 
+  it should "build the simplest count(*) expression" in {
+    TestNode().returns { case go ~~ _ => count}.query shouldEqual "MATCH (a:TestNode)   RETURN count(*) "
+  }
 }
