@@ -14,7 +14,8 @@
  */
 package com.websudos.reactiveneo.dsl
 
-import com.websudos.reactiveneo.query.BuiltQuery
+import com.websudos.reactiveneo.attribute.Attribute
+import com.websudos.reactiveneo.query.{CypherOperators, BuiltQuery}
 import play.api.libs.json.{Reads, _}
 
 
@@ -25,13 +26,50 @@ trait Functions {
    */
   abstract class Function[T] extends ReturnExpression[T]
 
-  object count extends Function[Int] {
+  class Count extends Function[Int] {
 
     override def query( context: QueryBuilderContext ): BuiltQuery = "count(*)"
 
-    override def resultParser: Reads[Int] = {
-      (__ \ "count(*)").read[Int]
-    }
+    override def resultParser: Reads[Int] = (__ \ "count(*)").read[Int]
+
   }
+
+
+  class CountOfNodes(node: Node[_,_]) extends Function[Int] {
+
+    override def query( context: QueryBuilderContext ): BuiltQuery = {
+      val label = context.resolve(node)
+      s"count($label)"
+    }
+
+    override def resultParser: Reads[Int] = (__ \ "count(*)").read[Int]
+
+  }
+
+  class CountOfValues(attr: Attribute[_,_,_]) extends Function[Int] {
+
+    override def query( context: QueryBuilderContext ): BuiltQuery = {
+      val label =     context.resolve(attr.owner.asInstanceOf[GraphObject[_,_]]) + CypherOperators.DOT + attr.name
+      s"count($label)"
+    }
+
+    override def resultParser: Reads[Int] = (__ \ "count(*)").read[Int]
+
+  }
+
+  /**
+   * `count` function initializations.
+   */
+  object count {
+
+    def apply() = new Count
+
+    def apply(node: Node[_, _]) = new CountOfNodes(node)
+
+    def apply(attr: Attribute[_,_,_]) = new CountOfValues(attr)
+
+  }
+
+
 
 }

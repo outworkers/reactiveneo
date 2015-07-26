@@ -46,6 +46,15 @@ class MatchQueryTest extends FlatSpec with Matchers {
   }
 
   it should "build the simplest count(*) expression" in {
-    TestNode().returns { case go ~~ _ => count}.query shouldEqual "MATCH (a:TestNode)   RETURN count(*) "
+    TestNode().returns { case go ~~ _ => count()}.query shouldEqual "MATCH (a:TestNode)   RETURN count(*) "
+  }
+
+
+  it should "build the count(n) expression to count all nodes" in {
+    TestNode().returns { case go ~~ _ => count(go)}.query shouldEqual "MATCH (a:TestNode)   RETURN count(a) "
+  }
+
+  it should "build the count(n) expression to count all values" in {
+    TestNode().returns { case go ~~ _ => count(go.name)}.query shouldEqual "MATCH (a:TestNode)   RETURN count(a.name) "
   }
 }
