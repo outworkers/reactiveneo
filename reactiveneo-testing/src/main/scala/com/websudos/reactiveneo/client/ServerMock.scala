@@ -48,9 +48,9 @@ class ServerMock(handler: (HttpRequest) => HttpResponse) {
     ServerBuilder().codec(Http()).bindTo(address).name("testserver").build(new Respond)
   }
 
-  val port = server.localAddress.asInstanceOf[InetSocketAddress].getPort
+  val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
 
-  val host = server.localAddress.asInstanceOf[InetSocketAddress].getHostName
+  val host = server.boundAddress.asInstanceOf[InetSocketAddress].getHostName
 
   def close() {
     server.close()
@@ -68,7 +68,7 @@ trait ServerMockSugar {
 
   def withServer(handler: (HttpRequest) => HttpResponse, block: InetSocketAddress => Unit): Unit = {
     val server = new ServerMock(handler)
-    block(server.server.localAddress.asInstanceOf[InetSocketAddress])
+    block(server.server.boundAddress.asInstanceOf[InetSocketAddress])
   }
 
 }
