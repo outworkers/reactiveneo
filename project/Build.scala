@@ -19,7 +19,7 @@ import org.scalastyle.sbt.ScalastylePlugin
 
 object Build extends Build {
 
-  val UtilVersion = "0.9.8"
+  val UtilVersion = "0.9.10"
   val ScalatestVersion = "2.2.4"
   val ShapelessVersion = "2.2.4"
   val FinagleVersion = "6.25.0"
@@ -71,7 +71,7 @@ object Build extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
     organization := "com.websudos",
-    version := "0.3.0",
+    version := "0.3.1",
     scalaVersion := "2.10.5",
     crossScalaVersions := Seq("2.10.5", "2.11.6"),
     resolvers ++= Seq(
