@@ -18,7 +18,6 @@ import java.net.InetSocketAddress
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
-import com.websudos.util.testing._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{Server, ServerBuilder}
 import com.twitter.finagle.http.Http
@@ -30,16 +29,16 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
 import org.jboss.netty.handler.codec.http._
 import org.scalatest._
-import org.scalatest.concurrent.PatienceConfiguration
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.SpanSugar._
 
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
-import scala.concurrent.ExecutionContext.Implicits.global
 
-class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
+class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter with ScalaFutures {
 
-  implicit val s: PatienceConfiguration.Timeout = timeout(10 seconds)
+  implicit val s: PatienceConfiguration.Timeout = Timeout(10 seconds)
 
   var server: Server = _
 
@@ -61,7 +60,7 @@ class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
   it should "execute a request" in {
       val client = new RestClient(ClientConfiguration("localhost", 6666, FiniteDuration(10, TimeUnit.SECONDS)))
       val result = client.makeRequest("/")
-      result.successful { res =>
+      whenReady(result) { res =>
         res.getStatus.getCode should equal(200)
         res.getContent.toString(Charset.forName("UTF-8")) should equal("neo")
       }
@@ -76,7 +75,7 @@ class RestClientTest extends FlatSpec with Matchers with BeforeAndAfter {
         }
       }
       val result: scala.concurrent.Future[String] = client.makeRequest("/")
-      result successful { res =>
+      whenReady(result) { res =>
         res should equal("neo")
       }
   }

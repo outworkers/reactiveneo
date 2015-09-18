@@ -95,9 +95,7 @@ object reactiveneo extends Build {
       "Sonatype snapshots"               at "https://oss.sonatype.org/content/repositories/snapshots",
       "Sonatype staging"                 at "http://oss.sonatype.org/content/repositories/staging",
       "Java.net Maven2 Repository"       at "http://download.java.net/maven/2/",
-      "Twitter Repository"               at "http://maven.twttr.com",
-      "Websudos releases"                at "http://maven.websudos.co.uk/ext-release-local",
-      "Websudos snapshots"               at "http://maven.websudos.co.uk/ext-snapshot-local"
+      "Twitter Repository"               at "http://maven.twttr.com"
     ),
     scalacOptions ++= Seq(
       "-language:postfixOps",
@@ -115,7 +113,6 @@ object reactiveneo extends Build {
       "com.chuusai"                  %  "shapeless_2.10.4"                  % "2.0.0",
       "com.github.nscala-time"       %% "nscala-time"                       % "1.0.0",
       "com.typesafe.scala-logging"   %% "scala-logging-slf4j"               % "2.1.2",
-      "com.websudos"                 %% "util-testing"                      % UtilVersion   % "test",
       "org.scalaz"                   %% "scalaz-scalacheck-binding"         % ScalazVersion       % "test",
       "org.scalatest"                %% "scalatest"                         % ScalatestVersion    % "test, provided",
       "org.scalamock"                %% "scalamock-scalatest-support"       % "3.0.1"             % "test"
@@ -132,8 +129,7 @@ object reactiveneo extends Build {
     name := "ReactiveNeo"
   ).aggregate(
     reactiveneoDsl,
-    reactiveneoTesting,
-    reactiveneoZookeeper
+    reactiveneoTesting
   )
 
   lazy val reactiveneoDsl = Project(
@@ -152,22 +148,11 @@ object reactiveneo extends Build {
       "joda-time"                    %  "joda-time"                         % "2.3",
       "org.joda"                     %  "joda-convert"                      % "1.6",
       "com.typesafe.play"            %% "play-json"                         % playVersion,
-      "net.liftweb"                  %% "lift-json"                         % "2.6-M4"                  % "test, provided"
+      "net.liftweb"                  %% "lift-json"                         % "2.6-M4"             % "test, provided",
+      "com.github.docker-java"       % "docker-java"                        % "2.1.1"              % "test"
     )
   ).dependsOn(
     reactiveneoTesting % "test, provided"
-  )
-
-  lazy val reactiveneoZookeeper = Project(
-    id = "reactiveneo-zookeeper",
-    base = file("reactiveneo-zookeeper"),
-    settings = Defaults.coreDefaultSettings ++ sharedSettings
-  ).settings(
-    name := "reactiveneo-zookeeper",
-    libraryDependencies ++= Seq(
-      "com.twitter"                  %% "finagle-serversets"                % FinagleVersion,
-      "com.twitter"                  %% "finagle-zookeeper"                 % FinagleVersion
-    )
   )
 
   lazy val reactiveneoTesting = Project(
@@ -178,14 +163,12 @@ object reactiveneo extends Build {
     name := "reactiveneo-testing",
     libraryDependencies ++= Seq(
       "com.twitter"                      %% "util-core"                % FinagleVersion,
-      "com.websudos"                     %% "util-testing"             % UtilVersion,
       "org.scalatest"                    %% "scalatest"                % ScalatestVersion,
       "org.scalacheck"                   %% "scalacheck"               % "1.11.3",
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
       "com.twitter"                      %% "finagle-http"             % FinagleVersion,
       "com.twitter"                      %% "util-core"                % FinagleVersion
     )
-  ).dependsOn(
-    reactiveneoZookeeper
   )
+
 }

@@ -42,7 +42,7 @@ object Start extends Direction {
 /**
  * ADT root for Pattern object.
  */
-sealed trait Pattern {
+sealed trait Pattern { self =>
 
   def queryClause( context: QueryBuilderContext ): String
 
@@ -51,7 +51,7 @@ sealed trait Pattern {
    * @param action Action to be applied to every single node and relationship
    */
   def foreach( action: GraphObject[_,_] => Unit ): Unit = {
-    this match {
+    self match {
       case p: PatternLink[_, _] =>
         action(p.node.owner: GraphObject[_,_])
         p.next.foreach(action)
